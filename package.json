@@ -1,6 +1,9 @@
 {
-  "name": "companion-module-livemind-recorder",
+  "name": "livemind-recorder",
   "version": "0.5.0",
+  "manufacturer": "Livemind",
+  "product": [ "Recorder" ],
+  "shortname": "Recorder",
   "description": "A module to control Livemind Recorder",
   "main": "index.js",
   "scripts": {
@@ -8,8 +11,10 @@
   },
   "author": "Chad Carpenter",
   "keywords": [
-    "Livemind Recorder"
+    "Livemind Recorder",
+    "Recording",
+    "NDI"
   ],
-  "manufacturer": "Livemind",
-  "license": "ISC"
+
+  "license": "MIT"
 }
