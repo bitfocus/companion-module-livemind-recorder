@@ -8,6 +8,8 @@ Livemind Recorder is a desktop application letting you monitor and record up to 
 
 This project is a module for Companion that uses the Livemind Recorder TCP API to bring forth a set of commands and feedback.
 
+This module was developed against **Livemind Recorder v0.9.4.0**
+
 ## Additional Information
 
 Please see the [HELP](/HELP.md) document for the following:
