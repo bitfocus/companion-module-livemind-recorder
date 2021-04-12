@@ -1,20 +1,6 @@
 // Index.js
 // companion-module-livemind-recorder
 
-// var instance_skel = require('../../instance_skel');
-
-// function instance(system, id, config) {
-// 	var self = this;
-
-// 	// super-constructor
-// 	instance_skel.apply(this, arguments);
-// 	...
-// 	return self;
-// }
-
-// instance_skel.extendedBy(instance);
-// exports = module.exports = instance;
-
 var tcp = require('../../tcp');
 var instance_skel = require('../../instance_skel');
 var debug;
@@ -45,12 +31,21 @@ instance.prototype.config_fields = function () {
             id: 'info',
             width: 12,
             label: 'Information',
-            value: 'This module is for Livemind Recorder NDI recording software.'
+            value: 
+              `<div style='margin-left: 20px;padding-left: 10px;border-left: 3px #BBBBBB solid'> 
+              This module is for Livemind Recorder NDI recording software. To confiure, 
+              add the <b>IP address</b> and <b>port</b> of the machine where Livemind Recorder is running.
+              Multiple instances of the module can be added each pointing to a different
+              IP address to control multiple instances of Recorder.
+              <br><br>
+              <b>Note</b>: If Recorder is running on a separate machine from 
+              Companion you will need to create exceptions in your operating system's 
+              firewall on BOTH machines at the port number you set.</div> `
         },
         {
             type: 'textinput',
             id: 'host',
-            label: 'IP Address of Livemind Recorder (Default: 127.0.0.1)',
+            label: 'IP Address (Default: 127.0.0.1)',
             width: 6,
             default: '127.0.0.1',
             regex: self.REGEX_IP
@@ -58,16 +53,16 @@ instance.prototype.config_fields = function () {
         {
             type: 'number',
             id: 'port',
-            label: 'TCP Port of Recorder (Default: 9099)',
-            width: 3,
+            label: 'TCP Port (Default: 9099)',
+            width: 4,
             default: 9099,
             regex: self.REGEX_PORT
         },
         {
             type: 'number',
             id: 'pollInterval',
-            label: 'Polling Interval in milliseconds (Default: 250)',
-            width: 6,
+            label: 'Polling Interval in ms (Default: 250)',
+            width: 5,
             min: 15,
             max: 10000,
             default: 250,
@@ -76,7 +71,7 @@ instance.prototype.config_fields = function () {
         {
             type: 'checkbox',
             id: 'debug',
-            width: 3,
+            width: 6,
             label: 'Enable debug to log window',
             default: false
         }
@@ -104,29 +99,6 @@ instance.prototype.init = function () {
     self.initTCP();
 }
 
-instance.prototype.initActions = function () {
-    var self = this;
-    var actions = {};
-
-    actions['sample_action'] = {
-        label: 'Sample Action',
-        options: [
-            {
-                type: 'textinput',
-                label: 'Some Text',
-                id: 'text',
-                regex: self.REGEX_SOMETHING
-            }
-        ],
-        callback = function (action, bank) {
-            var opt = action.options;
-            self.sendCommand(`SET sample_action: ${opt.text}`);
-        }
-    };
-
-    self.setActions(actions);
-}
-
 // Initialize TCP connection
 instance.prototype.initTCP = function () {
     var self = this;
@@ -142,7 +114,7 @@ instance.prototype.initTCP = function () {
 
     if (self.config.host) {
         self.socket = new tcp(self.config.host, self.config.port);
-
+      
         self.socket.on('status_change', function (status, message) {
             self.status(status, message);
         });
@@ -153,19 +125,10 @@ instance.prototype.initTCP = function () {
         });
 
         self.socket.on('connect', function () {
+            console.log(self.socket.message)
             self.debug("Connected");
+            self.log('info', "Livemind Recorder Connected at IP " + self.config.host + ' on port ' + self.config.port);
         });
-    }
-}
-
-// Send command
-instance.prototype.sendCommand = function (cmd) {
-    var self = this;
-
-    if (cmd !== undefined && cmd != '') {
-        if (self.socket !== undefined && self.socket.connected) {
-            self.socket.send(cmd);
-        }
     }
 }
 
@@ -185,15 +148,43 @@ instance.prototype.updateConfig = function (config) {
     }
 }
 
-instance_skel.extendedBy(instance);
-exports = module.exports = instance;
+// ########################
+// #### Define Actions ####
+// ########################
 
+instance.prototype.initActions = function () {
+    var self = this;
+    var actions = {};
 
+    actions['sample_action'] = {
+        label: 'Sample Action',
+        options: [
+            {
+                type: 'textinput',
+                label: 'Some Text',
+                id: 'text',
+                regex: self.REGEX_SOMETHING
+            }
+        ],
+        callback: function (action, bank) {
+            var opt = action.options;
+            self.sendCommand(`SET sample_action: ${opt.text}`);
+        }
+    };
 
-// ##########################
-// #### Instance Actions ####
-// ##########################
+    self.setActions(actions);
+}
 
+// Send command
+instance.prototype.sendCommand = function (cmd) {
+    var self = this;
+
+    if (cmd !== undefined && cmd != '') {
+        if (self.socket !== undefined && self.socket.connected) {
+            self.socket.send(cmd);
+        }
+    }
+}
 
 // ##########################
 // #### Define Feedbacks ####
@@ -209,4 +200,5 @@ exports = module.exports = instance;
 // #### Define Variables ####
 // ##########################
 
-
+instance_skel.extendedBy(instance);
+exports = module.exports = instance;

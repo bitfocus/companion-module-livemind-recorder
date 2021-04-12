@@ -8,14 +8,14 @@ Livemind Record offers an API through a simple TCP interface to control its oper
 
 - In **Recorder**, connections are accepted on a port selected in the Settings dialog (`9099` by default ). Please make sure the port is set and the checkbox is enabled. 
   
-  _[Note: You may have to confgure this port in your operating system's firewall to allow Recorder to recieve connections from other devices on your network. The machine where Companion is running will also need this port configured to allow traffic.]_
+  _**Note**: You may have to confgure this port in your operating system's firewall to allow Recorder to recieve connections from other devices on your network. The machine where Companion is running will also need this port configured to allow traffic.]_
 - In **Companion**: Add the module to your setup and fill in the following setup parameters:
 
   - **IP ADDRESS**: This is the IP address of the machine running Livemind Recorder. If you are running on the same computer as Companion you may use `127.0.0.1` otherwise enter a valid IPv4 address in the same subnet. (Default: `127.0.0.1`)
   
-  - **Port**: This is the TCP API port where Recorder is listenting for commands. This needs to match the port set in the Recorder settings dialog. (Default: `9099`)
+  - **PORT**: This is the TCP API port where Recorder is listenting for commands. This needs to match the port set in the Recorder settings dialog. (Default: `9099`)
 
-  - **POLLING INTERVAL**: This is the time in milliseconds that Companion polls Recorder to check for any status changes. Setting the value too low here may have a performance impact on Companion and could cause unnecessary network traffic. Setting the value too high will cause Companion to not get notificaiton of status changes in Recorder in a timely manner. We find that a good compromise is **250ms** and does not effect performance and allows for timely ststus updates. (Default: `250`)
+  - **POLLING INTERVAL**: This is the time in milliseconds that Companion polls Recorder to check for status changes. Setting the value too low here may have a performance impact on Companion and could cause unnecessary network traffic. Setting the value too high will cause Companion to not get notificaiton of status changes from Recorder in a timely manner. We find that a good compromise is **250ms** and does not effect performance and allows for timely ststus updates. (Default: `250`)
 
 ---
 ## Available Actions
