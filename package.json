@@ -2,8 +2,10 @@
   "name": "livemind-recorder",
   "version": "0.5.0",
   "manufacturer": "Livemind",
-  "product": [ "Recorder" ],
-  "shortname": "Recorder",
+  "product": [
+    "Recorder"
+  ],
+  "shortname": "recorder",
   "description": "A module to control Livemind Recorder",
   "main": "index.js",
   "scripts": {
@@ -15,6 +17,12 @@
     "Recording",
     "NDI"
   ],
-
-  "license": "MIT"
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bitfocus/companion-module-livemind-recorder.git"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "fast-xml-parser": "^3.19.0"
+  }
 }
