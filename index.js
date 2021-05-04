@@ -158,9 +158,16 @@ instance.prototype.initTCP = function () {
 		self.socket.on('receiveline', function (line) {
 			if (line !== undefined || !isNull(line)) {
 				self.log('debug', '[Livemind Recorder] Data received: ' + line)
-                var response = xmlParser.parse(line)
+                
+                try {
+                    var response = xmlParser.parse(line)
+                }
+                catch(err) {
+                    self.log('error', '[Livemind Recorder] XML Parser error: ' + err.message)
+                }
+                
                 console.log(response);
-                self.log('debug', '[Livemind Recorder] Data recieved: ' + response)
+                self.debug('[Livemind Recorder] Data recieved: ' + response.version)
                 self.setVariable('version', '1234');
 			} else {
 				self.log('error', '[Livemind Recorder] Data received was undefined or null')
