@@ -4,6 +4,14 @@
 var tcp           = require('../../tcp');
 var instance_skel = require('../../instance_skel');
 var xmlParser     = require('fast-xml-parser');
+const { prototype } = require('mocha');
+var xmlOptions = {
+    attributeNamePrefix   : "",
+    ignoreAttributes      : false,
+    parseNodeValue        : true,
+    parseAttributeValue   : false,
+    trimValues            : true
+};
 var debug;
 var log;
 
@@ -103,6 +111,7 @@ instance.prototype.init = function () {
 
     self.setVariableDefinitions(self.getVariables());
     self.initPresets();
+    self.initFeedbacks();
     self.initTCP();
 }
 
@@ -160,20 +169,33 @@ instance.prototype.initTCP = function () {
 				self.log('debug', '[Livemind Recorder] Data received: ' + line)
                 
                 try {
-                    var response = xmlParser.parse(line)
+                    var response = xmlParser.parse(line, xmlOptions, true)
+                    
+                    if (response.hello) {
+                        self.setVariable('version', response.hello.release);
+                        self.setVariable('apiVersion', response.hello.protocol)
+                        self.subscribeEvents();
+                   }
+
                 }
                 catch(err) {
                     self.log('error', '[Livemind Recorder] XML Parser error: ' + err.message)
                 }
-                
-                console.log(response);
-                self.debug('[Livemind Recorder] Data recieved: ' + response.version)
-                self.setVariable('version', '1234');
+
 			} else {
 				self.log('error', '[Livemind Recorder] Data received was undefined or null')
 			}
 		});
 	}
+}
+
+
+// Subscribe to events
+instance.prototype.subscribeEvents = function() {
+    var self = this;
+    var cmd = '<recording_subscribe uid="12345" />\r\n'
+    self.sendCommand(cmd)
+    self.log('debug', '[Livemind Recorder] Subscribed to events sent')
 }
 
 // Update module after a config change
@@ -186,11 +208,11 @@ instance.prototype.updateConfig = function (config) {
     }
 
     self.config = config;
-    self.log('debug', '[Livemind Recorder] Update Config Saved.')
+    self.log('info', '[Livemind Recorder] Update Config Saved.')
 
     if (resetConnection === true || self.socket === undefined) {
         self.initTCP();
-        self.log('debug', '[Livemind Recorder] Update Config: Reinitialized socket')
+        self.log('info', '[Livemind Recorder] Update Config: Reinitialized socket')
     }
    
 }
@@ -301,6 +323,21 @@ instance.prototype.initActions = function () {
     self.setActions(actions);
 }
 
+instance.prototype.action = function(action) {
+    var self = this; 
+    var cmd;
+    var options = action.options;
+
+    
+    if (cmd !== undefined) {
+		self.sendCommand(cmd);
+	}
+	else {
+		self.log('error', '[Livemind Recorder] Invalid command: ' + cmd);
+    }
+
+};
+
 // Send command
 instance.prototype.sendCommand = function (cmd) {
     var self = this;
@@ -309,16 +346,45 @@ instance.prototype.sendCommand = function (cmd) {
         if (self.socket !== undefined && self.socket.connected) {
             self.log('debug', '[Livemind Recorder] Sending Command: ' + cmd)
             self.socket.send(cmd);
+        
         } else {
             self.log('error', '[Livemind Recorder] Empty or undefined command in sendCommand')
         }
     }
 }
 
+
+
 // ##########################
 // #### Define Feedbacks ####
 // ##########################
 
+instance.prototype.initFeedbacks = function() {
+    var self = this;
+    var feedbacks = {};
+
+    feedbacks['recStatus'] = {
+		label      : 'Change Button Color If Recording',
+		description: 'If Recording, set the button to this color.',
+		options    : [
+			{
+				type   : 'colorpicker',
+				label  : 'Foreground color',
+				id     : 'fg',
+				default: self.rgb(255,255,255)
+			},
+			{
+				type   : 'colorpicker',
+				label  : 'Background color',
+				id     : 'bg',
+				default: self.rgb(255,0,0)
+			},
+		]
+	};
+
+    self.setFeedbackDefinitions(feedbacks);
+    
+}
 
 // ########################
 // #### Define Presets ####
@@ -330,8 +396,8 @@ instance.prototype.initPresets = function () {
   
     presets.push({
       category: 'Commands',
-      label: 'startSlotRec',
-      bank: {
+      label   : 'startSlotRec',
+      bank    : {
         style  : 'text',
         text   : 'Record All Slots',
         size   : 'auto',
@@ -348,7 +414,28 @@ instance.prototype.initPresets = function () {
 
       }]
     });
-  
+
+    presets.push({
+      category: 'Commands',
+      label   : 'stopSlotRec',
+      bank    : {
+        style  : 'text',
+        text   : 'Stop Recording All Slots',
+        size   : 'auto',
+        color  : '16777215',
+        bgcolor: self.rgb(0,0,0)
+      },
+      actions: [{
+        action: 'stopRecordingSlot',
+        options: {
+          slot: 0
+        }
+      }],
+      feedbacks: [{
+
+      }]
+    });
+ 
   self.setPresetDefinitions(presets);
   }
 
