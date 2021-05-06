@@ -24,10 +24,10 @@ The following actions are available to assign to a button.
 
 Action                        | Description                  
 ----------------------------: | ---------------------------- 
-**startRecordingSlot**      | Starts recording in the specified slot number `[1-16]` or `0` starts recording on all connected channels 
-**stopRecordingSlot**      | Stops recording in the specified slot number `[1-16]` or `0` stops recording on all connected channels
-**startListeningSlot**     | Starts listening to audio on the specified slot number. Note: Only one slot can be listented to at a time and the audio will come from the machine where Recorder is running. 
-**stopListeningSlot**      | Stops listening to audio on the specified slot. 
+**startRecordingSlot**      | Starts recording in the specified slot number `[1-16]` or `All` connected channels 
+**stopRecordingSlot**      | Stops recording in the specified slot number `[1-16]` or `All` connected channels
+**startListeningSlot**     | Starts listening to audio on the specified slot number `[1-16]`. **Note:** Only one slot can be listented to at a time and the audio will come from the machine where Recorder is running
+**stopListeningSlot**      | Stops listening to audio on the specified slot `[1-16]` 
 **refreshStatus**           | Forces a refresh of the current status of all record slots and updates feedback and variables in Companion 
 
 
@@ -38,7 +38,10 @@ The following feedback has been implemented allowing Companion to indicate the s
 
 Feedback          | Description                        
 ----------------- | ---------------------------------- 
- **slotStatus**  | Will indicate the status of the specified slot number [1-16]  
+ **slotIsRecording**| Set the button color if a slot `[1-16 or All]` is recording
+ **slotIsStopped**  | Set the button color if a slot `[1-16 or All]` is stopped (not recording) 
+ **slotIsListening**| Set the button color if listening to slot `[1-16]` audio
+ **slotIsStopListening**| Set the button color when listening stops for slot `[1-16]` audio
 
 ---
 ## Variables
@@ -48,8 +51,9 @@ The following variables are available to Companion.
 Variable                | Description 
 ----------------------- | ----------------------------------- 
 **$(recorder:version)** | The current verison of the connected Recorder instance
-**$(recorder:status)**  | Connection status of Recorder. Possible values are: `Connected`, `Not-Connected`, `Error`       
-**$(recorder:slot_status_`x`)** | Status of a given Recorder slot. `x` is a slot numnber `[1-16]`.
+**$(recorder:apiVersion)** | The API version of the connected Recorder instance
+**$(recorder:status)**  | Connection status of Recorder. Possible values are: `Connected`, `Not Connected`, `Error`       
+**$(recorder:recordingSlot_`x`)** | Recording status of a given slot. `x` is a slot numnber `[1-16]`.
 ---
 ## Presets
 
@@ -65,5 +69,6 @@ Preset          | Description
 ### Notes
 It is reccomended to `disable` any instances of the Recorder module in Companion if the Recorder application is not open and running on the target computer. If the application is not open Companion will coninuously try to connect to the application causing repeated errors in the logfile as well as unecessary network traffic. You can create a button that toggles `enable/disable` of any instance of the Recorder module. 
 
+---
 
 That's it. Have fun and if you have any questions please submit an issue in this module's [GitHub Repository](https://github.com/bitfocus/companion-module-livemind-recorder) or leave a message on the official [Bitfocus Slack Channel](https://bitfocusio.slack.com/archives/CFG7HAN5N)

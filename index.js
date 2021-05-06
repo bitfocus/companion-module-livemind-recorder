@@ -5,6 +5,7 @@ var tcp           = require('../../tcp');
 var instance_skel = require('../../instance_skel');
 var xmlParser     = require('fast-xml-parser');
 const { prototype } = require('mocha');
+const { isNull } = require('lodash');
 var xmlOptions = {
     attributeNamePrefix   : "",
     ignoreAttributes      : false,
@@ -96,6 +97,7 @@ instance.prototype.destroy = function () {
     var self = this;
 
     if (self.socket !== undefined) {
+        self.setVariable('status', 'Not Connected');
         self.socket.destroy();
     }
 
@@ -109,7 +111,7 @@ instance.prototype.init = function () {
     debug = self.debug;
     log = self.log;
 
-    self.setVariableDefinitions(self.getVariables());
+    self.initVariables();
     self.initPresets();
     self.initFeedbacks();
     self.initTCP();
@@ -123,6 +125,7 @@ instance.prototype.initTCP = function () {
     if (self.socket !== undefined) {
         self.log('warn', '[Livemind Recorder] Killing existing socket connections');
         self.socket.destroy();
+        self.setVariable('status', 'Not Connected');
         delete self.socket;
     }
 
@@ -139,12 +142,14 @@ instance.prototype.initTCP = function () {
 
         self.socket.on('error', function (err) {
             self.debug("Network error", err);
+            self.setVariable('status', 'Error');
             self.log('error', '[Livemind Recorder] Network error: ' + err.message);
         });
 
         self.socket.on('connect', function () {
             console.log('Socket Message: ' + self.socket.message)
             self.debug("Connected");
+            self.setVariable('status', 'Connected');
             self.log('info', '[Livemind Recorder] Connected to Livemind Recorder at IP ' + self.config.host + ' on port ' + self.config.port);
         });
         
@@ -268,12 +273,13 @@ instance.prototype.initActions = function () {
         label: 'Start Recording in a Slot',
         options: [
             {
-                type   : 'multiselect',
-                label  : 'Select Slot [1-16, or All]',
-                id     : 'slot',
-                tooltip: 'Select the slot to start recording, or select All Coonected Slots',
-                default: 0,
-                choices: self.CHOICES_SLOT
+                type        : 'multiselect',
+                label       : 'Select Slot [1-16, or All]',
+                id          : 'slot',
+                tooltip     : 'Select the slot to start recording, or select All Coonected Slots. \r\nMinimum selection is 1 item, add one item to remote the first item.',
+                default     : 0,
+                choices     : self.CHOICES_SLOT,
+                minSelection: 1
             }
         ]
         // callback: function (action, bank) {
@@ -285,12 +291,13 @@ instance.prototype.initActions = function () {
         label: 'Stop Recording in a Slot',
         options: [
             {
-                type   : 'multiselect',
-                label  : 'Select Slot [1-16, or All]',
-                id     : 'slot',
-                tooltip: 'Select the slot to stop recording, or select All Connected Slots',
-                default: 0,
-                choices: self.CHOICES_SLOT
+                type        : 'multiselect',
+                label       : 'Select Slot [1-16, or All]',
+                id          : 'slot',
+                tooltip     : 'Select the slot to stop recording, or select All Connected Slots \r\nMinimum selection is 1 item, add one item to remote the first item.',
+                default     : 0,
+                choices     : self.CHOICES_SLOT,
+                minSelection: 1
             }
         ]
 
@@ -318,6 +325,15 @@ instance.prototype.initActions = function () {
                 choices: self.CHOICES_SLOT_NOALL
             }
         ]
+    },
+    actions['refreshStatus'] = {
+        label: 'Force refresh status on all slots',
+        options: [
+            {
+                type : 'text',
+                label: 'No options for the command'
+            }
+        ]
     }
 
     self.setActions(actions);
@@ -328,6 +344,43 @@ instance.prototype.action = function(action) {
     var cmd;
     var options = action.options;
 
+    switch(action.action) {
+
+        case 'startRecordingSlot':
+            if (options.slot !== undefined || !isNull(options.slot)) {
+                if (options.slot[0] === 0) {
+                    cmd = '<recording_start slot="0" uid="1234" />\r\n'
+                    self.sendCommand(cmd);
+                } else {
+                    options.slot.forEach(element => {
+                        cmd = '<recording_start slot="' + element.id.toString() + '" uid="1234" />\r\n'
+                        self.sendCommand(cmd);
+                        cmd = ''
+                    });
+                }
+            } else {
+                self.log('error', '[Livemind Recorder] Slot not defined in command options')
+            }
+           
+            
+            break;
+
+        case 'stopRecordingSlot':
+
+            break;
+
+        case 'startSlotListen':
+
+            break;
+
+        case 'stopSlotListen':
+
+            break;
+        
+        case 'refreshStatus':
+
+            break;
+    }
     
     if (cmd !== undefined) {
 		self.sendCommand(cmd);
@@ -363,27 +416,111 @@ instance.prototype.initFeedbacks = function() {
     var self = this;
     var feedbacks = {};
 
-    feedbacks['recStatus'] = {
-		label      : 'Change Button Color If Recording',
-		description: 'If Recording, set the button to this color.',
-		options    : [
-			{
-				type   : 'colorpicker',
-				label  : 'Foreground color',
-				id     : 'fg',
-				default: self.rgb(255,255,255)
-			},
-			{
-				type   : 'colorpicker',
-				label  : 'Background color',
-				id     : 'bg',
-				default: self.rgb(255,0,0)
-			},
-		]
-	};
+    feedbacks['slotIsRecording'] = {
+        label      : 'Change Color if Slot is Recording',
+        description: 'If Recording, set the button to this color.',
+        options    : [
+            {
+                type   : 'multiselect',
+                label  : 'Select Slot [1-16, or All]',
+                id     : 'slot',
+                tooltip: 'Select the slot this feedback monitors, or select All Coonected Slots',
+                default: 0,
+                choices: self.CHOICES_SLOT
+            },
+            {
+                type   : 'colorpicker',
+                label  : 'Foreground color',
+                id     : 'fg',
+                default: self.rgb(255, 255, 255)
+            },
+            {
+                type   : 'colorpicker',
+                label  : 'Background color',
+                id     : 'bg',
+                default: self.rgb(255, 0, 0)
+            },
+        ]
+    },
+    feedbacks['slotIsStopped'] = {
+        label      : 'Change Color if Slot is Stopped',
+        description: 'If Stopped, set the button to this color.',
+        options    : [
+            {
+                type   : 'multiselect',
+                label  : 'Select Slot [1-16, or All]',
+                id     : 'slot',
+                tooltip: 'Select the slot this feedback monitors, or select All Coonected Slots',
+                default: 0,
+                choices: self.CHOICES_SLOT
+            },
+            {
+                type   : 'colorpicker',
+                label  : 'Foreground color',
+                id     : 'fg',
+                default: self.rgb(255, 255, 255)
+            },
+            {
+                type   : 'colorpicker',
+                label  : 'Background color',
+                id     : 'bg',
+                default: self.rgb(0, 0, 0)
+            },
+        ]
+    },
+    feedbacks['slotIsListening'] = {
+        label      : 'Change Color if Listning to Slot Audio',
+        description: 'If Listning to Audio, set the button to this color.',
+        options    : [
+            {
+                type   : 'multiselect',
+                label  : 'Select Slot [1-16]',
+                id     : 'slot',
+                tooltip: 'Select the slot this feedback monitors',
+                choices: self.CHOICES_SLOT_NOALL
+            },
+            {
+                type   : 'colorpicker',
+                label  : 'Foreground color',
+                id     : 'fg',
+                default: self.rgb(255, 255, 255)
+            },
+            {
+                type   : 'colorpicker',
+                label  : 'Background color',
+                id     : 'bg',
+                default: self.rgb(0, 0, 255)
+            },
+        ]
+    },
+    feedbacks['slotIsStopListening'] = {
+        label      : 'Change Color if Stop Listening to Slot Audio',
+        description: 'If Stopped Listening to Audio, set the button to this color.',
+        options    : [
+            {
+                type   : 'multiselect',
+                label  : 'Select Slot [1-16]',
+                id     : 'slot',
+                tooltip: 'Select the slot this feedback monitors',
+                choices: self.CHOICES_SLOT_NOALL
+            },
+            {
+                type   : 'colorpicker',
+                label  : 'Foreground color',
+                id     : 'fg',
+                default: self.rgb(255, 255, 255)
+            },
+            {
+                type   : 'colorpicker',
+                label  : 'Background color',
+                id     : 'bg',
+                default: self.rgb(0, 0, 0)
+            },
+        ]
+    };
 
     self.setFeedbackDefinitions(feedbacks);
-    
+
 }
 
 // ########################
@@ -395,24 +532,35 @@ instance.prototype.initPresets = function () {
     var presets = [];
   
     presets.push({
-      category: 'Commands',
-      label   : 'startSlotRec',
-      bank    : {
-        style  : 'text',
-        text   : 'Record All Slots',
-        size   : 'auto',
-        color  : '16777215',
-        bgcolor: self.rgb(0,0,0)
-      },
-      actions: [{
-        action: 'startRecordingSlot',
-        options: {
-          slot: 0
-        }
-      }],
-      feedbacks: [{
-
-      }]
+        category: 'Commands',
+        label   : 'startSlotRec',
+        bank    : {
+            style  : 'text',
+            text   : 'Record All Slots',
+            size   : 'auto',
+            color  : '16777215',
+            bgcolor: self.rgb(0, 0, 0)
+        },
+        actions: [{
+            action : 'startRecordingSlot',
+            options: {
+                slot: 0
+            }
+        }],
+        feedbacks: [
+            {
+                type   : 'slotIsRecording',
+                options: {
+                    slot: 0
+                }
+            },
+            {
+                type   : 'slotIsStopped',
+                options: {
+                    slot: 0
+                }
+            }
+        ]
     });
 
     presets.push({
@@ -426,13 +574,16 @@ instance.prototype.initPresets = function () {
         bgcolor: self.rgb(0,0,0)
       },
       actions: [{
-        action: 'stopRecordingSlot',
+        action : 'stopRecordingSlot',
         options: {
           slot: 0
         }
       }],
       feedbacks: [{
-
+        type   : 'slotIsStopped',
+        options: {
+            slot: 0
+        }
       }]
     });
  
@@ -443,19 +594,32 @@ instance.prototype.initPresets = function () {
 // #### Define Variables ####
 // ##########################
 
-instance.prototype.getVariables = function() {
+instance.prototype.initVariables = function() {
+    var self = this;
+
     var variables = [ 
-        {
-            label: 'Version of Livemind Recorder',
-            name : 'version'
-        },
-        {
-            label: 'API Version of Livemind Recorder',
-            name : 'apiVersion'
-        }
+        { label: 'Version of Livemind Recorder', name: 'version' },
+        { label: 'API Version of Livemind Recorder', name: 'apiVersion' },
+        { label: 'Connection status of this Recorder instance', name: 'status'},
+        { label: 'Slot 1 Recording', name: 'recordingSlot_1' },
+        { label: 'Slot 2 Recording', name: 'recordingSlot_2' },
+        { label: 'Slot 3 Recording', name: 'recordingSlot_3' },
+        { label: 'Slot 4 Recording', name: 'recordingSlot_4' },
+        { label: 'Slot 5 Recording', name: 'recordingSlot_5' },
+        { label: 'Slot 6 Recording', name: 'recordingSlot_6' },
+        { label: 'Slot 7 Recording', name: 'recordingSlot_7' },
+        { label: 'Slot 8 Recording', name: 'recordingSlot_8' },
+        { label: 'Slot 9 Recording', name: 'recordingSlot_9' },
+        { label: 'Slot 10 Recording', name: 'recordingSlot_10' },
+        { label: 'Slot 11 Recording', name: 'recordingSlot_11' },
+        { label: 'Slot 12 Recording', name: 'recordingSlot_12' },
+        { label: 'Slot 13 Recording', name: 'recordingSlot_13' },
+        { label: 'Slot 14 Recording', name: 'recordingSlot_14' },
+        { label: 'Slot 15 Recording', name: 'recordingSlot_15' },
+        { label: 'Slot 16 Recording', name: 'recordingSlot_16' }
     ];
 
-    return variables;
+    self.setVariableDefinitions(variables);
     
 }
 
