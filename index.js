@@ -4,8 +4,6 @@
 var tcp           = require('../../tcp');
 var instance_skel = require('../../instance_skel');
 var xmlParser     = require('fast-xml-parser');
-const { prototype } = require('mocha');
-const { isNull } = require('lodash');
 var xmlOptions = {
     attributeNamePrefix   : "",
     ignoreAttributes      : false,
@@ -74,11 +72,11 @@ instance.prototype.config_fields = function () {
         {
             type    : 'number',
             id      : 'pollInterval',
-            label   : 'Polling Interval in ms (Default: 250)',
+            label   : 'Polling Interval in ms (Default: 500)',
             width   : 5,
             min     : 15,
             max     : 10000,
-            default : 250,
+            default : 500,
             required: true,
             regex   : self.REGEX_FLOAT_OR_INT
         },
@@ -90,18 +88,6 @@ instance.prototype.config_fields = function () {
             default: false
         }
     ]
-}
-
-// When module gets deleted
-instance.prototype.destroy = function () {
-    var self = this;
-
-    if (self.socket !== undefined) {
-        self.setVariable('status', 'Not Connected');
-        self.socket.destroy();
-    }
-
-    self.debug('[Livemind Recorder] Destroy', self.id);
 }
 
 // Initalize module
@@ -147,7 +133,6 @@ instance.prototype.initTCP = function () {
         });
 
         self.socket.on('connect', function () {
-            console.log('Socket Message: ' + self.socket.message)
             self.debug("Connected");
             self.setVariable('status', 'Connected');
             self.log('info', '[Livemind Recorder] Connected to Livemind Recorder at IP ' + self.config.host + ' on port ' + self.config.port);
@@ -194,13 +179,16 @@ instance.prototype.initTCP = function () {
 	}
 }
 
-
-// Subscribe to events
-instance.prototype.subscribeEvents = function() {
+// When module gets deleted
+instance.prototype.destroy = function () {
     var self = this;
-    var cmd = '<recording_subscribe uid="12345" />\r\n'
-    self.sendCommand(cmd)
-    self.log('debug', '[Livemind Recorder] Subscribed to events sent')
+
+    if (self.socket !== undefined) {
+        self.setVariable('status', 'Not Connected');
+        self.socket.destroy();
+    }
+
+    self.debug('[Livemind Recorder] Destroy', self.id);
 }
 
 // Update module after a config change
@@ -219,7 +207,19 @@ instance.prototype.updateConfig = function (config) {
         self.initTCP();
         self.log('info', '[Livemind Recorder] Update Config: Reinitialized socket')
     }
+
+    self.initVariables();
+    self.initPresets();
+    self.initFeedbacks();
    
+}
+
+// Subscribe to events
+instance.prototype.subscribeEvents = function() {
+    var self = this;
+    var cmd = '<recording_subscribe uid="' + Date.now() + '" />\r\n'
+    self.sendCommand(cmd)
+    self.log('debug', '[Livemind Recorder] Subscribed to events sent')
 }
 
 // ########################
@@ -265,19 +265,20 @@ instance.prototype.CHOICES_SLOT_NOALL = [
     { id: '16', label: 'Slot 16' },
 ];
 
+// Define actions
 instance.prototype.initActions = function () {
     var self = this;
     var actions = {};
 
     actions['startRecordingSlot'] = {
-        label: 'Start Recording in a Slot',
+        label: 'Start Recording Slot',
         options: [
             {
                 type        : 'multiselect',
                 label       : 'Select Slot [1-16, or All]',
                 id          : 'slot',
                 tooltip     : 'Select the slot to start recording, or select All Coonected Slots. \r\nMinimum selection is 1 item, add one item to remote the first item.',
-                default     : 0,
+                default     : [ '0' ],
                 choices     : self.CHOICES_SLOT,
                 minSelection: 1
             }
@@ -288,14 +289,14 @@ instance.prototype.initActions = function () {
         //}
     },
     actions['stopRecordingSlot'] = {
-        label: 'Stop Recording in a Slot',
+        label: 'Stop Recording Slot',
         options: [
             {
                 type        : 'multiselect',
                 label       : 'Select Slot [1-16, or All]',
                 id          : 'slot',
                 tooltip     : 'Select the slot to stop recording, or select All Connected Slots \r\nMinimum selection is 1 item, add one item to remote the first item.',
-                default     : 0,
+                default     : [ '0' ],
                 choices     : self.CHOICES_SLOT,
                 minSelection: 1
             }
@@ -303,31 +304,31 @@ instance.prototype.initActions = function () {
 
     },
     actions['startListenSlot'] = {
-        label: 'Start Listening to a Slot',
+        label: 'Start Listening Slot',
         options: [
             {
-                type   : 'dropdown',
-                label  : 'Select Slot [1-16]',
-                id     : 'slot',
-                tooltip: 'Select the slot you want to listen to',
-                choices: self.CHOICES_SLOT_NOALL
+                type        : 'dropdown',
+                label       : 'Select Slot [1-16]',
+                id          : 'slot',
+                tooltip     : 'Select the slot you want to listen to',
+                choices     : self.CHOICES_SLOT_NOALL
             }
         ]
     },
     actions['stopListenSlot'] = {
-        label: 'Stop Listening to a Slot',
+        label: 'Stop Listening Slot',
         options: [
             {
-                type   : 'dropdown',
-                label  : 'Select Slot [1-16]',
-                id     : 'slot',
-                tooltip: 'Select the slot you want to stop listening to',
-                choices: self.CHOICES_SLOT_NOALL
+                type        : 'dropdown',
+                label       : 'Select Slot [1-16]',
+                id          : 'slot',
+                tooltip     : 'Select the slot you want to stop listening to',
+                choices     : self.CHOICES_SLOT_NOALL
             }
         ]
     },
     actions['refreshStatus'] = {
-        label: 'Force refresh status on all slots',
+        label: 'Refresh',
         options: [
             {
                 type : 'text',
@@ -339,6 +340,7 @@ instance.prototype.initActions = function () {
     self.setActions(actions);
 }
 
+// Carry out the actions of a button press
 instance.prototype.action = function(action) {
     var self = this; 
     var cmd;
@@ -348,33 +350,48 @@ instance.prototype.action = function(action) {
 
         case 'startRecordingSlot':
             if (options.slot !== undefined || !isNull(options.slot)) {
-                if (options.slot[0] === 0) {
-                    cmd = '<recording_start slot="0" uid="1234" />\r\n'
-                    self.sendCommand(cmd);
+                if (parseInt(options.slot[0]) === 0) {
+                    cmd = '<recording_start slot="0" uid="' + Date.now() + '" />\r\n'
                 } else {
+                    cmd = ''
                     options.slot.forEach(element => {
-                        cmd = '<recording_start slot="' + element.id.toString() + '" uid="1234" />\r\n'
-                        self.sendCommand(cmd);
-                        cmd = ''
+                        cmd += '<recording_start slot="' + element + '" uid="' + Date.now() + Math.floor(Math.random() * 100) + '" />\r\n'
                     });
                 }
             } else {
-                self.log('error', '[Livemind Recorder] Slot not defined in command options')
+                self.log('error', '[Livemind Recorder] startRecordingSlot: Slot not defined in command options')
             }
-           
-            
             break;
 
         case 'stopRecordingSlot':
-
+            if (options.slot !== undefined || !isNull(options.slot)) {
+                if (parseInt(options.slot[0]) === 0) {
+                    cmd = '<recording_stop slot="0" uid="' + Date.now() + '" />\r\n'
+                } else {
+                    cmd = ''
+                    options.slot.forEach(element => {
+                        cmd += '<recording_stop slot="' + element + '" uid="' + Date.now() + Math.floor(Math.random() * 100) + '" />\r\n'
+                    });
+                }
+            } else {
+                self.log('error', '[Livemind Recorder] stopRecordingSlot: Slot not defined in command options')
+            }
             break;
 
-        case 'startSlotListen':
-
+        case 'startListenSlot':
+            if (options.slot !== undefined || !isNull(options.slot)) {
+                cmd = '<listen slot="' + options.slot + '" uid="' + Date.now() + '" />\r\n'
+            } else {
+                self.log('error', '[Livemind Recorder] startSlotListen: Slot not defined in command options')
+            }
             break;
 
-        case 'stopSlotListen':
-
+        case 'stopListenSlot':
+            if (options.slot !== undefined || !isNull(options.slot)) {
+                cmd = '<listen_off slot="' + options.slot + '" uid="' + Date.now() + '" />\r\n'
+            } else {
+                self.log('error', '[Livemind Recorder] startSlotListen: Slot not defined in command options')
+            }
             break;
         
         case 'refreshStatus':
@@ -384,6 +401,7 @@ instance.prototype.action = function(action) {
     
     if (cmd !== undefined) {
 		self.sendCommand(cmd);
+        cmd = ''
 	}
 	else {
 		self.log('error', '[Livemind Recorder] Invalid command: ' + cmd);
@@ -398,8 +416,12 @@ instance.prototype.sendCommand = function (cmd) {
     if (cmd !== undefined && cmd != '') {
         if (self.socket !== undefined && self.socket.connected) {
             self.log('debug', '[Livemind Recorder] Sending Command: ' + cmd)
-            self.socket.send(cmd);
-        
+            try {
+                self.socket.send(cmd);
+            }
+            catch (err) {
+                self.log('error', '[Livemind Recorder] Error sending command: ' + err.message)
+            }
         } else {
             self.log('error', '[Livemind Recorder] Empty or undefined command in sendCommand')
         }
@@ -417,16 +439,16 @@ instance.prototype.initFeedbacks = function() {
     var feedbacks = {};
 
     feedbacks['slotIsRecording'] = {
-        label      : 'Change Color if Slot is Recording',
+        label      : 'Slot is Recording',
         description: 'If Recording, set the button to this color.',
         options    : [
             {
-                type   : 'multiselect',
-                label  : 'Select Slot [1-16, or All]',
-                id     : 'slot',
-                tooltip: 'Select the slot this feedback monitors, or select All Coonected Slots',
-                default: 0,
-                choices: self.CHOICES_SLOT
+                type        : 'dropdown',
+                label       : 'Select Slot [1-16, or All]',
+                id          : 'slot',
+                tooltip     : 'Select the slot this feedback monitors, or select All Coonected Slots',
+                default     : 0,
+                choices     : self.CHOICES_SLOT
             },
             {
                 type   : 'colorpicker',
@@ -443,16 +465,16 @@ instance.prototype.initFeedbacks = function() {
         ]
     },
     feedbacks['slotIsStopped'] = {
-        label      : 'Change Color if Slot is Stopped',
+        label      : 'Slot is Stopped',
         description: 'If Stopped, set the button to this color.',
         options    : [
             {
-                type   : 'multiselect',
-                label  : 'Select Slot [1-16, or All]',
-                id     : 'slot',
-                tooltip: 'Select the slot this feedback monitors, or select All Coonected Slots',
-                default: 0,
-                choices: self.CHOICES_SLOT
+                type        : 'dropdown',
+                label       : 'Select Slot [1-16, or All]',
+                id          : 'slot',
+                tooltip     : 'Select the slot this feedback monitors, or select All Coonected Slots',
+                default     : 0,
+                choices     : self.CHOICES_SLOT
             },
             {
                 type   : 'colorpicker',
@@ -469,15 +491,15 @@ instance.prototype.initFeedbacks = function() {
         ]
     },
     feedbacks['slotIsListening'] = {
-        label      : 'Change Color if Listning to Slot Audio',
+        label      : 'Slot Listning',
         description: 'If Listning to Audio, set the button to this color.',
         options    : [
             {
-                type   : 'multiselect',
-                label  : 'Select Slot [1-16]',
-                id     : 'slot',
-                tooltip: 'Select the slot this feedback monitors',
-                choices: self.CHOICES_SLOT_NOALL
+                type        : 'dropdown',
+                label       : 'Select Slot [1-16]',
+                id          : 'slot',
+                tooltip     : 'Select the slot this feedback monitors',
+                choices     : self.CHOICES_SLOT_NOALL
             },
             {
                 type   : 'colorpicker',
@@ -494,15 +516,15 @@ instance.prototype.initFeedbacks = function() {
         ]
     },
     feedbacks['slotIsStopListening'] = {
-        label      : 'Change Color if Stop Listening to Slot Audio',
+        label      : 'Slot Stop Listening',
         description: 'If Stopped Listening to Audio, set the button to this color.',
         options    : [
             {
-                type   : 'multiselect',
-                label  : 'Select Slot [1-16]',
-                id     : 'slot',
-                tooltip: 'Select the slot this feedback monitors',
-                choices: self.CHOICES_SLOT_NOALL
+                type        : 'dropdown',
+                label       : 'Select Slot [1-16]',
+                id          : 'slot',
+                tooltip     : 'Select the slot this feedback monitors',
+                choices     : self.CHOICES_SLOT_NOALL
             },
             {
                 type   : 'colorpicker',
@@ -533,7 +555,7 @@ instance.prototype.initPresets = function () {
   
     presets.push({
         category: 'Commands',
-        label   : 'startSlotRec',
+        label   : 'startAllSlotRec',
         bank    : {
             style  : 'text',
             text   : 'Record All Slots',
@@ -544,7 +566,7 @@ instance.prototype.initPresets = function () {
         actions: [{
             action : 'startRecordingSlot',
             options: {
-                slot: 0
+                slot: [ 0 ]
             }
         }],
         feedbacks: [
@@ -565,7 +587,7 @@ instance.prototype.initPresets = function () {
 
     presets.push({
       category: 'Commands',
-      label   : 'stopSlotRec',
+      label   : 'stopAllSlotRec',
       bank    : {
         style  : 'text',
         text   : 'Stop Recording All Slots',
@@ -576,7 +598,7 @@ instance.prototype.initPresets = function () {
       actions: [{
         action : 'stopRecordingSlot',
         options: {
-          slot: 0
+          slot: [ 0 ]
         }
       }],
       feedbacks: [{
@@ -622,7 +644,6 @@ instance.prototype.initVariables = function() {
     self.setVariableDefinitions(variables);
     
 }
-
 
 
 instance_skel.extendedBy(instance);

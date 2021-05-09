@@ -11,7 +11,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "Chad Carpenter",
+  "author": "Chad Carpenter <ccarpenter@absolutepros.com>",
   "keywords": [
     "Livemind Recorder",
     "Recording",

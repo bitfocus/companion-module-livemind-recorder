@@ -15,20 +15,20 @@ Livemind Record offers an API through a simple TCP interface to control its oper
   
   - **PORT**: This is the TCP API port where Recorder is listenting for commands. This needs to match the port set in the Recorder settings dialog. (Default: `9099`)
 
-  - **POLLING INTERVAL**: This is the time in milliseconds that Companion polls Recorder to check for status changes. Setting the value too low here may have a performance impact on Companion and could cause unnecessary network traffic. Setting the value too high will cause Companion to not get notificaiton of status changes from Recorder in a timely manner. We find that a good compromise is **250ms** and does not effect performance and allows for timely ststus updates. (Default: `250`)
+  - **POLLING INTERVAL**: This is the time in milliseconds that Companion polls Recorder to check for status changes. Setting the value too low here may have a performance impact on Companion and could cause unnecessary network traffic. Setting the value too high will cause Companion to not get notificaiton of status changes from Recorder in a timely manner. We find that a good compromise is **500ms** and does not effect performance and allows for timely ststus updates. (Default: `500`)
 
 ---
 ## Available Actions
 
 The following actions are available to assign to a button.
 
-Action                        | Description                  
-----------------------------: | ---------------------------- 
-**startRecordingSlot**      | Starts recording in the specified slot number `[1-16]` or `All` connected channels 
-**stopRecordingSlot**      | Stops recording in the specified slot number `[1-16]` or `All` connected channels
-**startListeningSlot**     | Starts listening to audio on the specified slot number `[1-16]`. **Note:** Only one slot can be listented to at a time and the audio will come from the machine where Recorder is running
-**stopListeningSlot**      | Stops listening to audio on the specified slot `[1-16]` 
-**refreshStatus**           | Forces a refresh of the current status of all record slots and updates feedback and variables in Companion 
+Action                   | Description                  
+-----------------------: | ---------------------------- 
+**Start Recording Slot** | Starts recording in the specified slot number `[1-16]` or `All` connected channels
+**Stop Recording Slot**  | Stops recording in the specified slot number `[1-16]` or `All` connected channels
+**Start Listening Slot** | Starts listening to audio on the specified slot number `[1-16]`. **Note:** Only one slot can be listented to at a time and the audio will come from the machine where Recorder is running
+**Stop Listening Slot**  | Stops listening to audio on the specified slot `[1-16]` 
+**Refresh**              | Forces a refresh of the current status of all record slots and updates feedback and variables in Companion 
 
 
 ---
@@ -38,10 +38,10 @@ The following feedback has been implemented allowing Companion to indicate the s
 
 Feedback          | Description                        
 ----------------- | ---------------------------------- 
- **slotIsRecording**| Set the button color if a slot `[1-16 or All]` is recording
- **slotIsStopped**  | Set the button color if a slot `[1-16 or All]` is stopped (not recording) 
- **slotIsListening**| Set the button color if listening to slot `[1-16]` audio
- **slotIsStopListening**| Set the button color when listening stops for slot `[1-16]` audio
+ **Slot Recording**| Set the button color if a slot `[1-16 or All]` is recording
+ **Slot Stopped**  | Set the button color if a slot `[1-16 or All]` is stopped (not recording) 
+ **Slot Listening**| Set the button color if listening to slot `[1-16]` audio
+ **Slot Stop Listening**| Set the button color when listening stops for slot `[1-16]` audio
 
 ---
 ## Variables
@@ -61,8 +61,8 @@ Presets have been created for many commond commands so that creating buttons is 
 
 Preset          | Description                                
 --------------- | -------------------------------------------
-**Record All**  | Starts recording on all available channels 
-**Stop All**    | Stops recording on all available channels  
+**Record All**  | Starts recording on all available channels, with feedback to change background color
+**Stop All**    | Stops recording on all available channels, with feedback to change background color  
 
 ---
 
