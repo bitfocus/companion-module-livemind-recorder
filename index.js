@@ -1,6 +1,6 @@
 // Index.js
 // companion-module-livemind-recorder
-
+var util = require('util');
 var tcp           = require('../../tcp');
 var instance_skel = require('../../instance_skel');
 var xmlParser     = require('fast-xml-parser');
@@ -25,9 +25,28 @@ function instance(system, id, config) {
     // super-constructor
     instance_skel.apply(this, arguments);
 
+    self.SLOTS = []
+    self.RECORDING_STATUS = [
+        { id: 0, status: 'Stopped'},
+        { id: 1, status: 'Recording'}
+    ]
+    self.createSlots();
+
     self.initActions(); // export action
 
     return self;
+}
+
+instance.prototype.createSlots = function () {
+    var self = this;
+    for (let index = 0; index < 17; index++) {
+        self.SLOTS.push({
+            id: index,
+            label: `Slot ${index}`,
+            recording: 0,
+            listening: 0
+        })
+    }
 }
 
 // Return config fields for web config
@@ -140,37 +159,34 @@ instance.prototype.initTCP = function () {
         
         // separate buffered stream into lines with responses
 		self.socket.on('data', function (chunk) {
-			var i = 0,
-				line = '',
-				offset = 0
-			receivebuffer += chunk
+			// var i = 0,
+			// 	line = '',
+			// 	offset = 0
+			// receivebuffer += chunk
 
-			while ((i = receivebuffer.indexOf('\r', offset)) !== -1) {
-				line = receivebuffer.substr(offset, i - offset)
-				offset = i + 1
-				self.socket.emit('receiveline', line.toString())
-			}
+			// while ((i = receivebuffer.indexOf('\r', offset)) !== -1) {
+			// 	line = receivebuffer.substr(offset, i - offset)
+			// 	offset = i + 1
+			// 	self.socket.emit('receiveline', line.toString())
+			// }
 
-			receivebuffer = receivebuffer.substr(offset)
+			// receivebuffer = receivebuffer.substr(offset)
+            self.socket.emit('receiveline', chunk.toString())
 		});
 
 		self.socket.on('receiveline', function (line) {
-			if (line !== undefined || !isNull(line)) {
+			if (line !== undefined || line !== '') {
 				self.log('debug', '[Livemind Recorder] Data received: ' + line)
-                
-                try {
-                    var response = xmlParser.parse(line, xmlOptions, true)
-                    
-                    if (response.hello) {
-                        self.setVariable('version', response.hello.release);
-                        self.setVariable('apiVersion', response.hello.protocol)
-                        self.subscribeEvents();
-                   }
 
+               try {
+                    var response = xmlParser.parse(line, xmlOptions, false);
+                    console.log(response)
                 }
                 catch(err) {
                     self.log('error', '[Livemind Recorder] XML Parser error: ' + err.message)
                 }
+
+                self.incomingData(response);
 
 			} else {
 				self.log('error', '[Livemind Recorder] Data received was undefined or null')
@@ -227,42 +243,42 @@ instance.prototype.subscribeEvents = function() {
 // ########################
 
 instance.prototype.CHOICES_SLOT = [
-    { id: '0', label: 'All Connected Slots' },
-    { id: '1', label: 'Slot 1' },
-    { id: '2', label: 'Slot 2' },
-    { id: '3', label: 'Slot 3' },
-    { id: '4', label: 'Slot 4' },
-    { id: '5', label: 'Slot 5' },
-    { id: '6', label: 'Slot 6' },
-    { id: '7', label: 'Slot 7' },
-    { id: '8', label: 'Slot 8' },
-    { id: '9', label: 'Slot 9' },
-    { id: '10', label: 'Slot 10' },
-    { id: '11', label: 'Slot 11' },
-    { id: '12', label: 'Slot 12' },
-    { id: '13', label: 'Slot 13' },
-    { id: '14', label: 'Slot 14' },
-    { id: '15', label: 'Slot 15' },
-    { id: '16', label: 'Slot 16' },
+    { id: 0, label: 'All Connected Slots' },
+    { id: 1, label: 'Slot 1' },
+    { id: 2, label: 'Slot 2' },
+    { id: 3, label: 'Slot 3' },
+    { id: 4, label: 'Slot 4' },
+    { id: 5, label: 'Slot 5' },
+    { id: 6, label: 'Slot 6' },
+    { id: 7, label: 'Slot 7' },
+    { id: 8, label: 'Slot 8' },
+    { id: 9, label: 'Slot 9' },
+    { id: 10, label: 'Slot 10' },
+    { id: 11, label: 'Slot 11' },
+    { id: 12, label: 'Slot 12' },
+    { id: 13, label: 'Slot 13' },
+    { id: 14, label: 'Slot 14' },
+    { id: 15, label: 'Slot 15' },
+    { id: 16, label: 'Slot 16' },
 ];
 
 instance.prototype.CHOICES_SLOT_NOALL = [
-    { id: '1', label: 'Slot 1' },
-    { id: '2', label: 'Slot 2' },
-    { id: '3', label: 'Slot 3' },
-    { id: '4', label: 'Slot 4' },
-    { id: '5', label: 'Slot 5' },
-    { id: '6', label: 'Slot 6' },
-    { id: '7', label: 'Slot 7' },
-    { id: '8', label: 'Slot 8' },
-    { id: '9', label: 'Slot 9' },
-    { id: '10', label: 'Slot 10' },
-    { id: '11', label: 'Slot 11' },
-    { id: '12', label: 'Slot 12' },
-    { id: '13', label: 'Slot 13' },
-    { id: '14', label: 'Slot 14' },
-    { id: '15', label: 'Slot 15' },
-    { id: '16', label: 'Slot 16' },
+    { id: 1, label: 'Slot 1' },
+    { id: 2, label: 'Slot 2' },
+    { id: 3, label: 'Slot 3' },
+    { id: 4, label: 'Slot 4' },
+    { id: 5, label: 'Slot 5' },
+    { id: 6, label: 'Slot 6' },
+    { id: 7, label: 'Slot 7' },
+    { id: 8, label: 'Slot 8' },
+    { id: 9, label: 'Slot 9' },
+    { id: 10, label: 'Slot 10' },
+    { id: 11, label: 'Slot 11' },
+    { id: 12, label: 'Slot 12' },
+    { id: 13, label: 'Slot 13' },
+    { id: 14, label: 'Slot 14' },
+    { id: 15, label: 'Slot 15' },
+    { id: 16, label: 'Slot 16' },
 ];
 
 // Define actions
@@ -278,7 +294,7 @@ instance.prototype.initActions = function () {
                 label       : 'Select Slot [1-16, or All]',
                 id          : 'slot',
                 tooltip     : 'Select the slot to start recording, or select All Coonected Slots. \r\nMinimum selection is 1 item, add one item to remote the first item.',
-                default     : [ '0' ],
+                default     : [ 0 ],
                 choices     : self.CHOICES_SLOT,
                 minSelection: 1
             }
@@ -296,12 +312,11 @@ instance.prototype.initActions = function () {
                 label       : 'Select Slot [1-16, or All]',
                 id          : 'slot',
                 tooltip     : 'Select the slot to stop recording, or select All Connected Slots \r\nMinimum selection is 1 item, add one item to remote the first item.',
-                default     : [ '0' ],
+                default     : [ 0 ],
                 choices     : self.CHOICES_SLOT,
                 minSelection: 1
             }
         ]
-
     },
     actions['startListenSlot'] = {
         label: 'Start Listening Slot',
@@ -331,8 +346,10 @@ instance.prototype.initActions = function () {
         label: 'Refresh',
         options: [
             {
-                type : 'text',
-                label: 'No options for the command'
+                type   : 'text',
+                label  : 'No options for the command',
+                id     : 'slot',  // Need to send 'fake' slot over to make 
+                default: 0        // switch statement make sense in action funciton
             }
         ]
     }
@@ -341,16 +358,18 @@ instance.prototype.initActions = function () {
 }
 
 // Carry out the actions of a button press
-instance.prototype.action = function(action) {
-    var self = this; 
+instance.prototype.action = function (action) {
+    var self = this;
     var cmd;
     var options = action.options;
 
-    switch(action.action) {
+    // Parse Command 
+    if (options.slot !== undefined || options.slot !== '') {
 
-        case 'startRecordingSlot':
-            if (options.slot !== undefined || !isNull(options.slot)) {
-                if (parseInt(options.slot[0]) === 0) {
+        switch (action.action) {
+
+            case 'startRecordingSlot':
+                if (options.slot[0] === 0) {
                     cmd = '<recording_start slot="0" uid="' + Date.now() + '" />\r\n'
                 } else {
                     cmd = ''
@@ -358,14 +377,10 @@ instance.prototype.action = function(action) {
                         cmd += '<recording_start slot="' + element + '" uid="' + Date.now() + Math.floor(Math.random() * 100) + '" />\r\n'
                     });
                 }
-            } else {
-                self.log('error', '[Livemind Recorder] startRecordingSlot: Slot not defined in command options')
-            }
-            break;
+                break;
 
-        case 'stopRecordingSlot':
-            if (options.slot !== undefined || !isNull(options.slot)) {
-                if (parseInt(options.slot[0]) === 0) {
+            case 'stopRecordingSlot':
+                if (options.slot[0] === 0) {
                     cmd = '<recording_stop slot="0" uid="' + Date.now() + '" />\r\n'
                 } else {
                     cmd = ''
@@ -373,38 +388,32 @@ instance.prototype.action = function(action) {
                         cmd += '<recording_stop slot="' + element + '" uid="' + Date.now() + Math.floor(Math.random() * 100) + '" />\r\n'
                     });
                 }
-            } else {
-                self.log('error', '[Livemind Recorder] stopRecordingSlot: Slot not defined in command options')
-            }
-            break;
+                break;
 
-        case 'startListenSlot':
-            if (options.slot !== undefined || !isNull(options.slot)) {
+            case 'startListenSlot':
                 cmd = '<listen slot="' + options.slot + '" uid="' + Date.now() + '" />\r\n'
-            } else {
-                self.log('error', '[Livemind Recorder] startSlotListen: Slot not defined in command options')
-            }
-            break;
+                break;
 
-        case 'stopListenSlot':
-            if (options.slot !== undefined || !isNull(options.slot)) {
+            case 'stopListenSlot':
                 cmd = '<listen_off slot="' + options.slot + '" uid="' + Date.now() + '" />\r\n'
-            } else {
-                self.log('error', '[Livemind Recorder] startSlotListen: Slot not defined in command options')
-            }
-            break;
-        
-        case 'refreshStatus':
+                break;
 
-            break;
+            case 'refreshStatus':
+                cmd = '<status slot="0" uid="' + Date.now() + '" />\r\n'
+                break;
+        }
+
+    } else {
+        self.log('error', '[Livemind Recorder] Slot not defined in command options')
     }
-    
+
+    // Send the command 
     if (cmd !== undefined) {
-		self.sendCommand(cmd);
+        self.sendCommand(cmd);
         cmd = ''
-	}
-	else {
-		self.log('error', '[Livemind Recorder] Invalid command: ' + cmd);
+    }
+    else {
+        self.log('error', '[Livemind Recorder] Invalid command: ' + cmd);
     }
 
 };
@@ -428,7 +437,37 @@ instance.prototype.sendCommand = function (cmd) {
     }
 }
 
+// Deal with incoming data
+instance.prototype.incomingData = function (data) {
+    var self = this;
 
+    if (data !== undefined || data !== '') {
+
+        if (data.hello) {
+            self.setVariable('version', data.hello.release);
+            self.setVariable('apiVersion', data.hello.protocol)
+            self.subscribeEvents();
+        }
+
+        // yes suces is spelled wrong, this is how the API returns it
+        if (data.succes) {
+            self.log('debug', '[Livemind Recorder] Command success')
+        }
+
+        if (data.failure) {
+            self.log('error', '[Livemind Recorder] Command failure: ' + data.failure.reason)
+        }
+
+        if (data.status) {
+            data.status.slot.forEach (element => {
+                self.SLOTS[element.id]
+            })
+        }
+
+    } else {
+        self.log('error', '[Livemind Recorder] No data in socket recieve')
+    }
+}
 
 // ##########################
 // #### Define Feedbacks ####
@@ -542,6 +581,10 @@ instance.prototype.initFeedbacks = function() {
     };
 
     self.setFeedbackDefinitions(feedbacks);
+
+}
+
+instance.prototype.feedback = function (feedback, bank) {
 
 }
 
