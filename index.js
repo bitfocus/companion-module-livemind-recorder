@@ -1,6 +1,7 @@
 // Index.js
 // companion-module-livemind-recorder
-var util = require('util');
+// GitHub: https://github.com/bitfocus/companion-module-livemind-recorder
+
 var tcp           = require('../../tcp');
 var instance_skel = require('../../instance_skel');
 var xmlParser     = require('fast-xml-parser');
@@ -8,7 +9,7 @@ var xmlOptions = {
     attributeNamePrefix   : "",
     ignoreAttributes      : false,
     parseNodeValue        : true,
-    parseAttributeValue   : false,
+    parseAttributeValue   : true,
     trimValues            : true
 };
 var debug;
@@ -30,16 +31,20 @@ function instance(system, id, config) {
         { id: 0, status: 'Stopped'},
         { id: 1, status: 'Recording'}
     ]
-    self.createSlots();
 
     self.initActions(); // export action
 
     return self;
 }
 
-instance.prototype.createSlots = function () {
+// Create array of slots to hold state data
+// numofSlots is the number of slots to create
+instance.prototype.createSlots = function (numOfSlots) {
     var self = this;
-    for (let index = 0; index < 17; index++) {
+    self.SLOTS = [];
+
+    self.log('debug', '[Livemind Recorder] Creating slots')
+    for (let index = 0; index <= numOfSlots; index++) {
         self.SLOTS.push({
             id: index,
             label: `Slot ${index}`,
@@ -89,21 +94,35 @@ instance.prototype.config_fields = function () {
             regex   : self.REGEX_PORT
         },
         {
-            type    : 'number',
-            id      : 'pollInterval',
-            label   : 'Polling Interval in ms (Default: 500)',
-            width   : 5,
-            min     : 15,
-            max     : 10000,
-            default : 500,
-            required: true,
-            regex   : self.REGEX_FLOAT_OR_INT
+            type   : 'dropdown',
+            id     : 'slotsToCreate',
+            label  : 'Number of Slots to Create [1-16]',
+            width  : 5,
+            default: 9,
+            choices: [
+                { id: 4, label: '4 Slots (2x2)' },
+                { id: 6, label: '6 Slots (3x2)' },
+                { id: 9, label: '9 Slots (3x3)' },
+                { id: 12, label: '12 Slots (4x3)' },
+                { id: 16, label: '16 Slots (4x4)(2+8)(2+14)' }
+            ] 
         },
+        // {
+        //     type    : 'number',
+        //     id      : 'pollInterval',
+        //     label   : 'Polling Interval in ms (Default: 500)',
+        //     width   : 5,
+        //     min     : 15,
+        //     max     : 10000,
+        //     default : 500,
+        //     required: true,
+        //     regex   : self.REGEX_FLOAT_OR_INT
+        // },
         {
             type   : 'checkbox',
-            id     : 'debug',
-            width  : 12,
-            label  : 'Enable debug to log window',
+            id     : 'verbose',
+            width  : 9,
+            label  : 'Enable verbose debug messages to log window',
             default: false
         }
     ]
@@ -115,17 +134,19 @@ instance.prototype.init = function () {
 
     debug = self.debug;
     log = self.log;
-
+   
+    self.createSlots(self.config.slotsToCreate);
     self.initVariables();
-    self.initPresets();
     self.initFeedbacks();
+    self.initPresets();
     self.initTCP();
+    //self.updateStatus();
 }
 
 // Initialize TCP connection
 instance.prototype.initTCP = function () {
     var self = this;
-    var receivebuffer = '';
+    var receiveBuffer = '';
 
     if (self.socket !== undefined) {
         self.log('warn', '[Livemind Recorder] Killing existing socket connections');
@@ -146,37 +167,37 @@ instance.prototype.initTCP = function () {
         });
 
         self.socket.on('error', function (err) {
-            self.debug("Network error", err);
+            self.debug('Network error', err);
             self.setVariable('status', 'Error');
             self.log('error', '[Livemind Recorder] Network error: ' + err.message);
         });
 
         self.socket.on('connect', function () {
-            self.debug("Connected");
+            self.debug('Connected');
             self.setVariable('status', 'Connected');
             self.log('info', '[Livemind Recorder] Connected to Livemind Recorder at IP ' + self.config.host + ' on port ' + self.config.port);
+            self.updateStatus();
         });
         
         // separate buffered stream into lines with responses
 		self.socket.on('data', function (chunk) {
-			// var i = 0,
-			// 	line = '',
-			// 	offset = 0
-			// receivebuffer += chunk
+			var i = 0,
+		        line = '',
+				offset = 0
+			receiveBuffer += chunk
 
-			// while ((i = receivebuffer.indexOf('\r', offset)) !== -1) {
-			// 	line = receivebuffer.substr(offset, i - offset)
-			// 	offset = i + 1
-			// 	self.socket.emit('receiveline', line.toString())
-			// }
+			while ((i = receiveBuffer.indexOf('\r\n', offset)) !== -1) {
+				line = receiveBuffer.substr(offset, i - offset)
+				offset = i + 1
+				self.socket.emit('receiveline', line.toString())
+			}
 
-			// receivebuffer = receivebuffer.substr(offset)
-            self.socket.emit('receiveline', chunk.toString())
+			receiveBuffer = receiveBuffer.substr(offset)
 		});
-
+        
 		self.socket.on('receiveline', function (line) {
 			if (line !== undefined || line !== '') {
-				self.log('debug', '[Livemind Recorder] Data received: ' + line)
+			    if (self.config.verbose) { self.log('debug', '[Livemind Recorder] Data received: ' + line) }
 
                try {
                     var response = xmlParser.parse(line, xmlOptions, false);
@@ -200,8 +221,9 @@ instance.prototype.destroy = function () {
     var self = this;
 
     if (self.socket !== undefined) {
-        self.setVariable('status', 'Not Connected');
-        self.socket.destroy();
+        self.sendCommand('<recording_unsubscribe uid="1234" />\r\n')
+        self.setVariable('status', 'Not Connected')
+        self.socket.destroy()
     }
 
     self.debug('[Livemind Recorder] Destroy', self.id);
@@ -212,21 +234,38 @@ instance.prototype.updateConfig = function (config) {
     var self = this;
     var resetConnection = false;
 
+    // check if host IP has updated
     if (self.config.host != config.host) {
         resetConnection = true;
     }
 
+    // check if host Port has updated
+    if (self.config.port != config.port) {
+        resetConnection = true;
+    }
+
+    // check if number of slots had changed
+    if (self.config.slotsToCreate != config.slotsToCreate) {
+        resetConnection = true;
+    }
+
+    // save new config
     self.config = config;
     self.log('info', '[Livemind Recorder] Update Config Saved.')
 
     if (resetConnection === true || self.socket === undefined) {
+        self.log('info', '[Livemind Recorder] Update Config: Reinitializing socket');
         self.initTCP();
-        self.log('info', '[Livemind Recorder] Update Config: Reinitialized socket')
     }
 
+    // recreate slots if needed
+    if (resetConnection === true) {
+        self.createSlots(self.config.slotsToCreate);
+    }
     self.initVariables();
     self.initPresets();
     self.initFeedbacks();
+    self.updateStatus();
    
 }
 
@@ -237,6 +276,64 @@ instance.prototype.subscribeEvents = function() {
     self.sendCommand(cmd)
     self.log('debug', '[Livemind Recorder] Subscribed to events sent')
 }
+
+// Deal with incoming data
+instance.prototype.incomingData = function (data) {
+    var self = this;
+
+    if (data !== undefined || data !== '') {
+
+        if (data.hello) {
+            self.setVariable('version', data.hello.release);
+            self.setVariable('apiVersion', (data.hello.protocol = 1 ? '1.0.0' : data.hello.protocol));
+            self.subscribeEvents();
+        }
+
+        // yes suces is spelled wrong, this is how the API returns it
+        // Lets check for both spellings
+        if (data.succes || data.success) {
+            self.log('info', '[Livemind Recorder] Command success')
+        }
+
+        if (data.failure) {
+            self.log('error', '[Livemind Recorder] Command failure: ' + data.failure.reason)
+        }
+
+        if (data.status) {
+            if (data.status.uid) {
+                self.log('info', '[Livemind Recorder] Getting all active slots status')
+            }
+            // Do nothing 
+            // In the XML returned from the API, <status> tags surround a 
+            // series of <slot ../> tags with slot status information
+        }
+
+        if (data.slot) {
+           // if (self.config.verbose) { self.log('debug', '[Livemind Recorder] Slot status received') }
+            self.SLOTS[data.slot.id - 1].recording = data.slot.recording
+            self.setVariable('recordingSlot_' + data.slot.id, data.slot.recording)
+        }
+
+        if (data.recording) {
+            self.log('debug', '[Livemind Recorder] Recording status update received')
+            self.SLOTS[data.recording.slot - 1].recording = data.recording.state
+            self.setVariable('recordingSlot_' + data.recording.slot, data.recording.state)
+        }
+
+        if (data.recording_all) {
+            self.log('debug', '[Livemind Recorder] Recording ALL status update received')
+            self.SLOTS[0].recording = data.recording_all.state
+            self.setVariable('recordingSlot_0', data.recording_all.state)
+            
+            // Force a refresh all to get status of other slots
+            self.updateStatus();
+        }
+
+    } else {
+        self.log('error', '[Livemind Recorder] No data in socket recieve')
+    }
+}
+
 
 // ########################
 // #### Define Actions ####
@@ -362,6 +459,7 @@ instance.prototype.action = function (action) {
     var self = this;
     var cmd;
     var options = action.options;
+    console.log(util.inspect(action))
 
     // Parse Command 
     if (options.slot !== undefined || options.slot !== '') {
@@ -392,10 +490,14 @@ instance.prototype.action = function (action) {
 
             case 'startListenSlot':
                 cmd = '<listen slot="' + options.slot + '" uid="' + Date.now() + '" />\r\n'
+                // Must be set manually as this status is not returned from the API
+                self.SLOTS[options.slot].listening = 1;
                 break;
 
             case 'stopListenSlot':
                 cmd = '<listen_off slot="' + options.slot + '" uid="' + Date.now() + '" />\r\n'
+                // Must be set manually as this status is not returned from the API
+                self.SLOTS[options.slot].listening = 0;
                 break;
 
             case 'refreshStatus':
@@ -423,8 +525,8 @@ instance.prototype.sendCommand = function (cmd) {
     var self = this;
 
     if (cmd !== undefined && cmd != '') {
-        if (self.socket !== undefined && self.socket.connected) {
-            self.log('debug', '[Livemind Recorder] Sending Command: ' + cmd)
+        if (self.socket !== undefined){ //} && self.socket.connected) {
+            if (self.config.verbose) { self.log('debug', '[Livemind Recorder] Sending Command: ' + cmd) }
             try {
                 self.socket.send(cmd);
             }
@@ -437,36 +539,10 @@ instance.prototype.sendCommand = function (cmd) {
     }
 }
 
-// Deal with incoming data
-instance.prototype.incomingData = function (data) {
+instance.prototype.updateStatus = function updateStatus() {
     var self = this;
-
-    if (data !== undefined || data !== '') {
-
-        if (data.hello) {
-            self.setVariable('version', data.hello.release);
-            self.setVariable('apiVersion', data.hello.protocol)
-            self.subscribeEvents();
-        }
-
-        // yes suces is spelled wrong, this is how the API returns it
-        if (data.succes) {
-            self.log('debug', '[Livemind Recorder] Command success')
-        }
-
-        if (data.failure) {
-            self.log('error', '[Livemind Recorder] Command failure: ' + data.failure.reason)
-        }
-
-        if (data.status) {
-            data.status.slot.forEach (element => {
-                self.SLOTS[element.id]
-            })
-        }
-
-    } else {
-        self.log('error', '[Livemind Recorder] No data in socket recieve')
-    }
+    var cmd = '<status slot="0" uid="' + Date.now() + '" />\r\n'
+    self.sendCommand(cmd);
 }
 
 // ##########################
@@ -585,6 +661,7 @@ instance.prototype.initFeedbacks = function() {
 }
 
 instance.prototype.feedback = function (feedback, bank) {
+    var self = this;
 
 }
 
@@ -651,6 +728,59 @@ instance.prototype.initPresets = function () {
         }
       }]
     });
+
+    const numberOfSLOTS = self.SLOTS.length;
+    for (let index = 1; index < numberOfSLOTS; index++) {
+        presets.push({
+            category: 'Record',
+            label   : `startRecSlot${index}`,
+            bank    : {
+              style  : 'text',
+              text   : `Record Slot ${index}`,
+              size   : 'auto',
+              color  : '16777215',
+              bgcolor: self.rgb(0,0,0)
+            },
+            actions: [{
+              action : 'startRecordingSlot',
+              options: {
+                slot: [ index ]
+              }
+            }],
+            feedbacks: [{
+              type   : 'slotIsRecording',
+              options: {
+                  slot: index
+              }
+            }]
+        });
+    }
+
+    for (let index = 1; index < numberOfSLOTS; index++) {
+        presets.push({
+            category: 'Stop Recording',
+            label   : `stopRecSlot${index}`,
+            bank    : {
+              style  : 'text',
+              text   : `Stop Slot ${index}`,
+              size   : 'auto',
+              color  : '16777215',
+              bgcolor: self.rgb(0,0,0)
+            },
+            actions: [{
+              action : 'stopRecordingSlot',
+              options: {
+                slot: [ index ]
+              }
+            }],
+            feedbacks: [{
+              type   : 'slotIsStopped',
+              options: {
+                  slot: index
+              }
+            }]
+        });
+    }
  
   self.setPresetDefinitions(presets);
   }
@@ -661,28 +791,18 @@ instance.prototype.initPresets = function () {
 
 instance.prototype.initVariables = function() {
     var self = this;
+    const numberOfSLOTS = self.SLOTS.length;
 
     var variables = [ 
         { label: 'Version of Livemind Recorder', name: 'version' },
         { label: 'API Version of Livemind Recorder', name: 'apiVersion' },
         { label: 'Connection status of this Recorder instance', name: 'status'},
-        { label: 'Slot 1 Recording', name: 'recordingSlot_1' },
-        { label: 'Slot 2 Recording', name: 'recordingSlot_2' },
-        { label: 'Slot 3 Recording', name: 'recordingSlot_3' },
-        { label: 'Slot 4 Recording', name: 'recordingSlot_4' },
-        { label: 'Slot 5 Recording', name: 'recordingSlot_5' },
-        { label: 'Slot 6 Recording', name: 'recordingSlot_6' },
-        { label: 'Slot 7 Recording', name: 'recordingSlot_7' },
-        { label: 'Slot 8 Recording', name: 'recordingSlot_8' },
-        { label: 'Slot 9 Recording', name: 'recordingSlot_9' },
-        { label: 'Slot 10 Recording', name: 'recordingSlot_10' },
-        { label: 'Slot 11 Recording', name: 'recordingSlot_11' },
-        { label: 'Slot 12 Recording', name: 'recordingSlot_12' },
-        { label: 'Slot 13 Recording', name: 'recordingSlot_13' },
-        { label: 'Slot 14 Recording', name: 'recordingSlot_14' },
-        { label: 'Slot 15 Recording', name: 'recordingSlot_15' },
-        { label: 'Slot 16 Recording', name: 'recordingSlot_16' }
+        { label: 'Slot 0 (All) Recording', name: 'recordingSlot_0' }
     ];
+
+    for (let index = 1; index < numberOfSLOTS; index++) {
+        variables.push({ label: `Slot ${index} Recording`, name: `recordingSlot_${index}` });
+    };
 
     self.setVariableDefinitions(variables);
     

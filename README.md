@@ -22,10 +22,15 @@ Please see the [HELP](/HELP.md) document for the following:
 
 ## Changelog
 
+**v1.1.0** (Future)
+- Select number of slots to create from number of slots returned in `updateStatus`
+- Enumerate NDI sources into variables
+- Implement assigning of sources to slots
+
 **v1.0.0** (Planned)
 
 - Initial release
 
-**v0.5.0**
+**v0.5.0** **(Current)**
 
 - Initial commit / development build
