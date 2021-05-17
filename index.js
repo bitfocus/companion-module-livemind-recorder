@@ -1,7 +1,7 @@
 // Index.js
 // companion-module-livemind-recorder
 // GitHub: https://github.com/bitfocus/companion-module-livemind-recorder
-
+var util = require('util');
 var tcp           = require('../../tcp');
 var instance_skel = require('../../instance_skel');
 var xmlParser     = require('fast-xml-parser');
@@ -287,6 +287,7 @@ instance.prototype.incomingData = function (data) {
             self.setVariable('version', data.hello.release);
             self.setVariable('apiVersion', (data.hello.protocol = 1 ? '1.0.0' : data.hello.protocol));
             self.subscribeEvents();
+           // self.updateStatus();
         }
 
         // yes suces is spelled wrong, this is how the API returns it
