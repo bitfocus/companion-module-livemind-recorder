@@ -1,7 +1,7 @@
 // Index.js
 // companion-module-livemind-recorder
 // GitHub: https://github.com/bitfocus/companion-module-livemind-recorder
-var util = require('util');
+
 var tcp           = require('../../tcp');
 var instance_skel = require('../../instance_skel');
 var xmlParser     = require('fast-xml-parser');
@@ -104,7 +104,7 @@ instance.prototype.config_fields = function () {
                 { id: 6, label: '6 Slots (3x2)' },
                 { id: 9, label: '9 Slots (3x3)' },
                 { id: 12, label: '12 Slots (4x3)' },
-                { id: 16, label: '16 Slots (4x4)(2+8)(2+14)' }
+                { id: 16, label: '16 Slots (4x4) (2+8) (2+14)' }
             ] 
         },
         // {
@@ -169,7 +169,7 @@ instance.prototype.initTCP = function () {
         self.socket.on('error', function (err) {
             self.debug('Network error', err);
             self.setVariable('status', 'Error');
-            self.log('error', '[Livemind Recorder] Network error: ' + err.message);
+            self.log('error', '[Livemind Recorder] TCP Socket error: ' + err.message);
         });
 
         self.socket.on('connect', function () {
@@ -201,7 +201,7 @@ instance.prototype.initTCP = function () {
 
                try {
                     var response = xmlParser.parse(line, xmlOptions, false);
-                    console.log(response)
+                    //console.log(response)
                 }
                 catch(err) {
                     self.log('error', '[Livemind Recorder] XML Parser error: ' + err.message)
@@ -221,7 +221,7 @@ instance.prototype.destroy = function () {
     var self = this;
 
     if (self.socket !== undefined) {
-        self.sendCommand('<recording_unsubscribe uid="1234" />\r\n')
+        self.sendCommand('<recording_unsubscribe uid="' + Date.now() + '" />\r\n')
         self.setVariable('status', 'Not Connected')
         self.socket.destroy()
     }
@@ -235,17 +235,17 @@ instance.prototype.updateConfig = function (config) {
     var resetConnection = false;
 
     // check if host IP has updated
-    if (self.config.host != config.host) {
+    if (self.config.host !== config.host) {
         resetConnection = true;
     }
 
     // check if host Port has updated
-    if (self.config.port != config.port) {
+    if (self.config.port !== config.port) {
         resetConnection = true;
     }
 
     // check if number of slots had changed
-    if (self.config.slotsToCreate != config.slotsToCreate) {
+    if (self.config.slotsToCreate !== config.slotsToCreate) {
         resetConnection = true;
     }
 
@@ -261,6 +261,7 @@ instance.prototype.updateConfig = function (config) {
     // recreate slots if needed
     if (resetConnection === true) {
         self.createSlots(self.config.slotsToCreate);
+        self.status(self.STATUS_OK)
     }
     self.initVariables();
     self.initPresets();
@@ -274,7 +275,7 @@ instance.prototype.subscribeEvents = function() {
     var self = this;
     var cmd = '<recording_subscribe uid="' + Date.now() + '" />\r\n'
     self.sendCommand(cmd)
-    self.log('debug', '[Livemind Recorder] Subscribed to events sent')
+    self.log('info', '[Livemind Recorder] Subscribe to record events sent')
 }
 
 // Deal with incoming data
@@ -290,14 +291,15 @@ instance.prototype.incomingData = function (data) {
            // self.updateStatus();
         }
 
-        // yes suces is spelled wrong, this is how the API returns it
+        // yes 'succes' is spelled wrong, this is how the API returns it
         // Lets check for both spellings
         if (data.succes || data.success) {
-            self.log('info', '[Livemind Recorder] Command success')
+            self.log('info', '[Livemind Recorder] Command success: uid=' + data.succes.uid)
+            self.checkFeedbacks();
         }
 
         if (data.failure) {
-            self.log('error', '[Livemind Recorder] Command failure: ' + data.failure.reason)
+            self.log('error', '[Livemind Recorder] Command failure: ' + data.failure.reason + ' / uid=' + data.failure.uid)
         }
 
         if (data.status) {
@@ -311,14 +313,22 @@ instance.prototype.incomingData = function (data) {
 
         if (data.slot) {
            // if (self.config.verbose) { self.log('debug', '[Livemind Recorder] Slot status received') }
+           try {
             self.SLOTS[data.slot.id - 1].recording = data.slot.recording
             self.setVariable('recordingSlot_' + data.slot.id, data.slot.recording)
+           } catch (err) {
+               self.log('error', '[Livemind Recorder] Error Slot undefined. Does the "Number of Slots to Create" in module settings match the slots in the "Grid Size" in Recorder?')
+               self.status(self.STATUS_ERROR, 'ERROR: Does the number of slots to create match the grid size in Recorder settings?');
+               self.setVariable('status', 'Error');
+           }
+           
         }
 
         if (data.recording) {
-            self.log('debug', '[Livemind Recorder] Recording status update received')
-            self.SLOTS[data.recording.slot - 1].recording = data.recording.state
+            self.log('info', '[Livemind Recorder] Recording status update received')
+            self.SLOTS[data.recording.slot - 1].recording = data.recording.state;
             self.setVariable('recordingSlot_' + data.recording.slot, data.recording.state)
+            self.checkFeedbacks('slotIsRecording');
         }
 
         if (data.recording_all) {
@@ -331,7 +341,7 @@ instance.prototype.incomingData = function (data) {
         }
 
     } else {
-        self.log('error', '[Livemind Recorder] No data in socket recieve')
+        self.log('error', '[Livemind Recorder] No data received from socket')
     }
 }
 
@@ -460,7 +470,6 @@ instance.prototype.action = function (action) {
     var self = this;
     var cmd;
     var options = action.options;
-    console.log(util.inspect(action))
 
     // Parse Command 
     if (options.slot !== undefined || options.slot !== '') {
@@ -540,7 +549,8 @@ instance.prototype.sendCommand = function (cmd) {
     }
 }
 
-instance.prototype.updateStatus = function updateStatus() {
+// Query the status of all active slots
+instance.prototype.updateStatus = function updateStatus(slf) {
     var self = this;
     var cmd = '<status slot="0" uid="' + Date.now() + '" />\r\n'
     self.sendCommand(cmd);
@@ -555,116 +565,107 @@ instance.prototype.initFeedbacks = function() {
     var feedbacks = {};
 
     feedbacks['slotIsRecording'] = {
+        type       : 'boolean',
         label      : 'Slot is Recording',
-        description: 'If Recording, set the button to this color.',
-        options    : [
-            {
+        description: 'If Recording, set the button to this style',
+        style      : {
+            color  : self.rgb(255,255,255),
+            bgcolor: self.rgb(200, 0, 0)
+        },
+        options    : [{
                 type        : 'dropdown',
                 label       : 'Select Slot [1-16, or All]',
                 id          : 'slot',
                 tooltip     : 'Select the slot this feedback monitors, or select All Coonected Slots',
                 default     : 0,
                 choices     : self.CHOICES_SLOT
-            },
-            {
-                type   : 'colorpicker',
-                label  : 'Foreground color',
-                id     : 'fg',
-                default: self.rgb(255, 255, 255)
-            },
-            {
-                type   : 'colorpicker',
-                label  : 'Background color',
-                id     : 'bg',
-                default: self.rgb(255, 0, 0)
-            },
-        ]
+        }],
+        callback: function (feedback, bank) {
+            if (self.SLOTS[feedback.options.slot].recording == 1) {
+                return true;
+            } else {
+                return false;
+            }
+        }
     },
     feedbacks['slotIsStopped'] = {
+        type       : 'boolean',
         label      : 'Slot is Stopped',
-        description: 'If Stopped, set the button to this color.',
-        options    : [
-            {
-                type        : 'dropdown',
-                label       : 'Select Slot [1-16, or All]',
-                id          : 'slot',
-                tooltip     : 'Select the slot this feedback monitors, or select All Coonected Slots',
-                default     : 0,
-                choices     : self.CHOICES_SLOT
-            },
-            {
-                type   : 'colorpicker',
-                label  : 'Foreground color',
-                id     : 'fg',
-                default: self.rgb(255, 255, 255)
-            },
-            {
-                type   : 'colorpicker',
-                label  : 'Background color',
-                id     : 'bg',
-                default: self.rgb(0, 0, 0)
-            },
-        ]
+        description: 'If Stopped, set the button to this style',
+        style      : {
+            color  : self.rgb(255, 255, 255),
+            bgcolor: self.rgb(0, 0, 0)
+        },
+        options: [{
+            type   : 'dropdown',
+            label  : 'Select Slot [1-16, or All]',
+            id     : 'slot',
+            tooltip: 'Select the slot this feedback monitors, or select All Coonected Slots',
+            default: 0,
+            choices: self.CHOICES_SLOT
+        }],
+        callback: function (feedback, bank) {
+            if (self.SLOTS[feedback.options.slot].recording == 0) {
+                return true;
+            } else {
+                return false;
+            }
+        }
     },
     feedbacks['slotIsListening'] = {
+        type       : 'boolean',
         label      : 'Slot Listning',
-        description: 'If Listning to Audio, set the button to this color.',
-        options    : [
-            {
-                type        : 'dropdown',
-                label       : 'Select Slot [1-16]',
-                id          : 'slot',
-                tooltip     : 'Select the slot this feedback monitors',
-                choices     : self.CHOICES_SLOT_NOALL
-            },
-            {
-                type   : 'colorpicker',
-                label  : 'Foreground color',
-                id     : 'fg',
-                default: self.rgb(255, 255, 255)
-            },
-            {
-                type   : 'colorpicker',
-                label  : 'Background color',
-                id     : 'bg',
-                default: self.rgb(0, 0, 255)
-            },
-        ]
-    },
+        description: 'If Listning to Audio, set the button to this style.',
+        style      : {
+            color  : self.rgb(255, 255, 255),
+            bgcolor: self.rgb(0, 0, 255)
+        },
+        options: [{
+                type   : 'dropdown',
+                label  : 'Select Slot [1-16]',
+                id     : 'slot',
+                tooltip: 'Select the slot this feedback monitors',
+                choices: self.CHOICES_SLOT_NOALL
+        }],
+        callback: function (feedback, bank) {
+            if (self.SLOTS[feedback.options.slot].listening == 1) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }
     feedbacks['slotIsStopListening'] = {
+        type       : 'boolean',
         label      : 'Slot Stop Listening',
-        description: 'If Stopped Listening to Audio, set the button to this color.',
-        options    : [
-            {
+        description: 'If Stopped Listening to Audio, set the button to this style.',
+        style      : {
+            color  : self.rgb(255, 255, 255),
+            bgcolor: self.rgb(0, 0, 0)
+        },
+        options    : [{
                 type        : 'dropdown',
                 label       : 'Select Slot [1-16]',
                 id          : 'slot',
                 tooltip     : 'Select the slot this feedback monitors',
                 choices     : self.CHOICES_SLOT_NOALL
-            },
-            {
-                type   : 'colorpicker',
-                label  : 'Foreground color',
-                id     : 'fg',
-                default: self.rgb(255, 255, 255)
-            },
-            {
-                type   : 'colorpicker',
-                label  : 'Background color',
-                id     : 'bg',
-                default: self.rgb(0, 0, 0)
-            },
-        ]
+        }],
+        callback: function (feedback, bank) {
+            if (self.SLOTS[feedback.options.slot].listening == 0) {
+                return true;
+            } else {
+                return false;
+            }
+        }
     };
 
     self.setFeedbackDefinitions(feedbacks);
-
 }
 
-instance.prototype.feedback = function (feedback, bank) {
-    var self = this;
+// instance.prototype.feedback = function (feedback, bank) {
+//     var self = this;
 
-}
+// }
 
 // ########################
 // #### Define Presets ####
@@ -674,6 +675,7 @@ instance.prototype.initPresets = function () {
     var self = this;
     var presets = [];
   
+    // Create a start all slots recording button
     presets.push({
         category: 'Commands',
         label   : 'startAllSlotRec',
@@ -687,34 +689,34 @@ instance.prototype.initPresets = function () {
         actions: [{
             action : 'startRecordingSlot',
             options: {
-                slot: [ 0 ]
+                slot: [0]
             }
         }],
-        feedbacks: [
-            {
-                type   : 'slotIsRecording',
-                options: {
-                    slot: 0
-                }
-            },
-            {
-                type   : 'slotIsStopped',
-                options: {
-                    slot: 0
-                }
+        feedbacks: [{
+            type: 'slotIsRecording',
+            options: {
+                slot: 0,
+                bgcolor: self.rgb(255,255,255)
             }
-        ]
+        },
+        {
+            type: 'slotIsStopped',
+            options: {
+                slot: 0
+            }
+        }]
     });
 
+    // Create a stop all slots recording button
     presets.push({
       category: 'Commands',
       label   : 'stopAllSlotRec',
       bank    : {
-        style  : 'text',
-        text   : 'Stop Recording All Slots',
-        size   : 'auto',
-        color  : '16777215',
-        bgcolor: self.rgb(0,0,0)
+        style       : 'text',
+        text        : 'Stop Recording All Slots',
+        size        : 'auto',
+        color       : '16777215',
+        bgcolor     : self.rgb(0,0,0)
       },
       actions: [{
         action : 'stopRecordingSlot',
@@ -730,17 +732,20 @@ instance.prototype.initPresets = function () {
       }]
     });
 
+    // Create a start recording button for each slot
     const numberOfSLOTS = self.SLOTS.length;
     for (let index = 1; index < numberOfSLOTS; index++) {
         presets.push({
             category: 'Record',
             label   : `startRecSlot${index}`,
             bank    : {
-              style  : 'text',
-              text   : `Record Slot ${index}`,
-              size   : 'auto',
-              color  : '16777215',
-              bgcolor: self.rgb(0,0,0)
+              style       : 'png',
+              text        : `Rec\\n${index}`,
+              size        : 'auto',
+              png64       : self.ICON_REC_INACTIVE,
+              pngalignment: 'center:center',
+              color       : self.rgb(255,255,255),
+              bgcolor     : self.rgb(0,0,0)
             },
             actions: [{
               action : 'startRecordingSlot',
@@ -757,16 +762,19 @@ instance.prototype.initPresets = function () {
         });
     }
 
+    // Create a stop recording button for each slot
     for (let index = 1; index < numberOfSLOTS; index++) {
         presets.push({
             category: 'Stop Recording',
             label   : `stopRecSlot${index}`,
             bank    : {
-              style  : 'text',
-              text   : `Stop Slot ${index}`,
-              size   : 'auto',
-              color  : '16777215',
-              bgcolor: self.rgb(0,0,0)
+                style       : 'png',
+                text        : `Stop\\n${index}`,
+                size        : 'auto',
+                // png64       : self.ICON_STOP_INACTIVE,
+                pngalignment: 'center:center',
+                color       : '16777215',
+                bgcolor     : self.rgb(0,0,0)
             },
             actions: [{
               action : 'stopRecordingSlot',
@@ -776,6 +784,40 @@ instance.prototype.initPresets = function () {
             }],
             feedbacks: [{
               type   : 'slotIsStopped',
+              options: {
+                  slot: index
+              }
+            }]
+        });
+    }
+
+    // Create Listening toggle buttons for each slot
+    for (let index = 1; index < numberOfSLOTS; index++) {
+        presets.push({
+            category: 'Listen',
+            label   : `toggleListenSlot${index}`,
+            bank    : {
+              style  : 'text',
+              text   : `Toggle Listen\\nSlot ${index}`,
+              size   : 'auto',
+              color  : self.rgb(255,255,255),
+              bgcolor: self.rgb(0,0,100),
+              latch  : true
+            },
+            actions: [{
+              action : 'startListenSlot',
+              options: {
+                slot: index 
+              }
+            }],
+            release_actions : [{
+                action : 'stopListenSlot',
+                options: {
+                    slot : index
+                }
+            }],
+            feedbacks: [{
+              type   : 'slotIsListening',
               options: {
                   slot: index
               }
@@ -808,6 +850,17 @@ instance.prototype.initVariables = function() {
     self.setVariableDefinitions(variables);
     
 }
+
+
+
+// module.exports = { 
+    
+//     ICON_RECORD_ACTIVE: 'iVBORw0KGgoAAAANSUhEUgAAAEgAAAA6BAMAAADhKQK+AAAACXBIWXMAAAsSAAALEgHS3X78AAAALVBMVEUAAAC/Hi6/Hi6/Hi6/Hi6/Hi6/Hi6/Hi6/Hi6/Hi6/Hi6/Hi6/Hi6/Hi6/Hi4HsQhdAAAADnRSTlMAEDBAYHCAj5+vv8/f7ycfOlsAAAEaSURBVEjHY2AYBQMMmI2NDQgoYap+BwTbFfCpYdn3DgxeO+AxZx3QlLQ0oGmvcJvl++6NI4gWOffuCi417O/eOjCopKU5MbDce1eAQ1Hdu4mMOSAnHROQfPcch6uBErEQh18FasDudt13CRLvoKCR/d0lrIrWvWTcB1P0WmDeK+y2XeR4BwcNsljt437nEIdQ9JTl3QYsivTeMN5DKHorcO4RtgB4wvYOCSTEYQuEfQ95kBUdkHuNRdG7DXrIih5xv8OSjt4V+CEresL+zgCLooQ8ZEXP2AaDIiIcTlQQEBeYdU+JiBaiIpiopEJUoiMq+QIzQgHhjEBUliIqcxKXzUEFRiCIFsVTYBBX9BBViBFXHBJXsI4CmgMA2gaVaGNM1LIAAAAASUVORK5CYII=', 
+  
+//     ICON_RECORD_STANDBY: 'iVBORw0KGgoAAAANSUhEUgAAAEgAAAA6BAMAAADhKQK+AAAACXBIWXMAAAsSAAALEgHS3X78AAAALVBMVEUAAAC/Hi6/Hi6/Hi6/Hi6/Hi6/Hi6/Hi6/Hi6/Hi6/Hi6/Hi6/Hi6/Hi6/Hi4HsQhdAAAADnRSTlMAECAwUGBwgJ+vv8/f7xg1Ib4AAADvSURBVEjHY2AYBQMLRKpWrZruiF+N5zswmIJPjc87KDiCW43ku3c3nBgYVHrfvZuISw3zuXdHIayYd28McCiyfXcNxsx9dxmHQfdew7Uz73uL3SiZdxsRHOl3B7EqmvdaAMFh3PcSmxoWVGfYvnPAoojnXQIyl+3dASyK/N6g8s89weakp6j8OCyOYnx3AVWA950AFnc3oApwYHE5O7oYy7sCDEVc7xRQBZjeTcCiCF3k3YKBV0SEw4kKAqICk6hoISqCiUsqRCU6opIvURmBuCxFVOYkKpsTV2AQVfQQV4gRVxwCC9ZKwgXrKKA5AADICI5kA+bEzgAAAABJRU5ErkJggg==',
+  
+//     ICON_STOP: 'iVBORw0KGgoAAAANSUhEUgAAAEgAAAA6BAMAAADhKQK+AAAACXBIWXMAAAsSAAALEgHS3X78AAAAElBMVEUAAABtbnFtbnFtbnFtbnFtbnEsIS3fAAAABXRSTlMAQIC/z9DMKFoAAAAzSURBVEjHY2AYBUMeMIViAIWBVxQiiAJcsSoKRhUwHVU0qmhUEe0VEZU5B1+pMgqGHAAA/fJVZzjiQe8AAAAASUVORK5CYII='
+// }
 
 
 instance_skel.extendedBy(instance);
