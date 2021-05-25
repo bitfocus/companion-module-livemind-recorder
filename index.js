@@ -141,6 +141,7 @@ instance.prototype.init = function () {
     self.initPresets();
     self.initTCP();
     //self.updateStatus();
+    
 }
 
 // Initialize TCP connection
@@ -695,14 +696,19 @@ instance.prototype.initPresets = function () {
         feedbacks: [{
             type: 'slotIsRecording',
             options: {
-                slot: 0,
-                bgcolor: self.rgb(255,255,255)
+                slot: 0
+            },
+            style : {
+                bgcolor: self.rgb(200,0,0)
             }
         },
         {
             type: 'slotIsStopped',
             options: {
                 slot: 0
+            },
+            style : {
+                bgcolor: self.rgb(0,0,0)
             }
         }]
     });
@@ -728,6 +734,9 @@ instance.prototype.initPresets = function () {
         type   : 'slotIsStopped',
         options: {
             slot: 0
+        },
+        style : {
+            bgcolor: self.rgb(0,0,0)
         }
       }]
     });
@@ -757,6 +766,9 @@ instance.prototype.initPresets = function () {
               type   : 'slotIsRecording',
               options: {
                   slot: index
+              },
+              style : {
+                  bgcolor: self.rgb(200,0,0)
               }
             }]
         });
@@ -786,6 +798,9 @@ instance.prototype.initPresets = function () {
               type   : 'slotIsStopped',
               options: {
                   slot: index
+              },
+              style : {
+                  bgcolor: self.rgb(0,0,0)
               }
             }]
         });
@@ -798,7 +813,7 @@ instance.prototype.initPresets = function () {
             label   : `toggleListenSlot${index}`,
             bank    : {
               style  : 'text',
-              text   : `Toggle Listen\\nSlot ${index}`,
+              text   : `Listen\\nSlot ${index}`,
               size   : 'auto',
               color  : self.rgb(255,255,255),
               bgcolor: self.rgb(0,0,100),
@@ -820,6 +835,9 @@ instance.prototype.initPresets = function () {
               type   : 'slotIsListening',
               options: {
                   slot: index
+              },
+              style : {
+                  bgcolor: self.rgb(0,0,240)
               }
             }]
         });

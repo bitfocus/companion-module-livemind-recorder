@@ -44,6 +44,8 @@ Feedback          | Description
  **Slot Listening**| Set the button color if listening to slot `[1-16]` audio
  **Slot Stop Listening**| Set the button color when listening stops for slot `[1-16]` audio
 
+**Note:** With slot start/stop listening Recorder does not return any confirmation that the command has executed successfully. To work around this the module internally keeps track of a slot's listening state. Since no feedback is received from the API, Companion might become out-of-sync with Recorder on a slot's listening state. Issueing a **Refresh All Slots** command should fix this. 
+
 ---
 ## Variables
 
@@ -59,7 +61,7 @@ Variable                | Description
 ---
 ## Presets
 
-Presets have been created for many commond commands so that creating buttons is easy.
+Presets have been created for many commond commands so that creating buttons is easy. This module will create preset buttons for the actions below based off of the number of slots you selected in the module settings. For example, if you have 9 slots configured in Recorder you should have 9 slots configured in module settings and Companion will create 9 presets for each of the functions below
 
 Preset          | Description                                
 --------------- | -------------------------------------------
@@ -67,6 +69,7 @@ Preset          | Description
 **Stop All**    | Stops recording on all available channels, with feedback to change background color 
 **Record Slot `X`** | Starts recording on the indicated slot `[1-16]`
 **Stop Slot `X`**   | Stops recording on the indicated slot `[1-16]`
+**Toggle Listen Slot `X`** | Toggles listening on/off for the selected slot `[1-16]`
 
 ---
 ### Notes
