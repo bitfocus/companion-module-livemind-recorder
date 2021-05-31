@@ -26,8 +26,8 @@ The following actions are available to assign to a button.
 
 Action                   | Description                  
 -----------------------: | ---------------------------- 
-**Start Recording Slot** | Starts recording in the specified slot number `[1-16]` or `All` connected channels
-**Stop Recording Slot**  | Stops recording in the specified slot number `[1-16]` or `All` connected channels
+**Start Recording Slot** | Starts recording in the specified slot number `[1-16]` or `All` active slots
+**Stop Recording Slot**  | Stops recording in the specified slot number `[1-16]` or `All` active slots
 **Start Listening Slot** | Starts listening to audio on the specified slot number `[1-16]`.   **Note:** Only one slot can be listented to at a time and the audio will come from the machine where Recorder is running
 **Stop Listening Slot**  | Stops listening to audio on the specified slot `[1-16]` 
 **Refresh**              | Forces a refresh of the current status of all record slots and updates feedback and variables in Companion 
@@ -56,12 +56,13 @@ Variable                | Description
 **$(recorder:version)** | The current verison of the connected Recorder instance
 **$(recorder:apiVersion)** | The API version of the connected Recorder instance
 **$(recorder:status)**  | Connection status of Recorder. Possible values are: `Connected`, `Not Connected`, `Error`    
-**$(recorder:recordingSlot_`x`)** | Recording status of a given slot. `x` is a slot numnber `[1-16]` Possible values are `0`- Not Recording, `1`- Recording, `undefined`- Slot not initialized
+**$(recorder:recordingSlot_`x`)** | Recording status of a given slot. `x` is a slot numnber `[1-16]` **Possible values are:** `0`- Not Recording, `1`- Recording, `undefined`- Slot not initialized
+**$(recorder:sourceSlot_`x`)** | Source name of a given slot. `x` is a slot numner `[1-16]`
 
 ---
 ## Presets
 
-Presets have been created for many commond commands so that creating buttons is easy. This module will create preset buttons for the actions below based off of the number of slots you selected in the module settings. For example, if you have 9 slots configured in Recorder you should have 9 slots configured in module settings and Companion will create 9 presets for each of the functions below
+Presets have been created for many commond commands so that creating buttons is easy. This module will create preset buttons for the actions below based off of the number of slots selected in the module settings. For example, if you have 9 slots configured in Recorder you should have 9 slots configured in module settings and Companion will create 9 presets for each of the functions below.  (A future version of this module will automatically determine the number of slots available in Recorder and update Companion accordingly.)
 
 Preset          | Description                                
 --------------- | -------------------------------------------
@@ -73,8 +74,8 @@ Preset          | Description
 
 ---
 ### Notes
-- It is reccomended to `disable` any instances of the Recorder module in Companion if the Recorder application is not open and running on the target computer. If the application is not open Companion will coninuously try to connect to the application causing repeated errors in the logfile as well as unecessary network traffic. You can create a button that toggles `enable/disable` of any instance of the Recorder module. 
-- Multiple instances of the module can be added each pointing to a different IP address to control multiple instances of Recorder. 
+- It is reccomended to `disable` any instances of the Recorder module in Companion if the Recorder application is not open and running on the target computer. If the application is not open, Companion will coninuously try to connect to the application causing repeated errors in the logfile as well as unecessary network traffic. You can create a button that toggles `enable/disable` of any instance of the Recorder module. 
+- Multiple instances of the module can be added each pointing to a different IP address to control multiple instances of Recorder. The port number used can also be changed should there be a conflict. 
 
 ---
 

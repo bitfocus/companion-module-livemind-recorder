@@ -43,11 +43,12 @@ instance.prototype.createSlots = function (numOfSlots) {
     var self = this;
     self.SLOTS = [];
 
-    self.log('debug', '[Livemind Recorder] Creating slots')
+    self.log('debug', `[Livemind Recorder] Creating ${numOfSlots} slots`);
     for (let index = 0; index <= numOfSlots; index++) {
         self.SLOTS.push({
-            id: index,
-            label: `Slot ${index}`,
+            id       : index,
+            label    : `Slot ${index}`,
+            source   : '',
             recording: 0,
             listening: 0
         })
@@ -96,7 +97,7 @@ instance.prototype.config_fields = function () {
         {
             type   : 'dropdown',
             id     : 'slotsToCreate',
-            label  : 'Number of Slots to Create [1-16]',
+            label  : 'Number of Slots to Create. This setting needs to match the "Grid Size" setting in Recorder settings.',
             width  : 5,
             default: 9,
             choices: [
@@ -202,7 +203,7 @@ instance.prototype.initTCP = function () {
 
                try {
                     var response = xmlParser.parse(line, xmlOptions, false);
-                    //console.log(response)
+                    //console.log(response)`
                 }
                 catch(err) {
                     self.log('error', '[Livemind Recorder] XML Parser error: ' + err.message)
@@ -305,7 +306,7 @@ instance.prototype.incomingData = function (data) {
 
         if (data.status) {
             if (data.status.uid) {
-                self.log('info', '[Livemind Recorder] Getting all active slots status')
+                self.log('info', '[Livemind Recorder] Gretting all active slots status')
             }
             // Do nothing 
             // In the XML returned from the API, <status> tags surround a 
@@ -317,6 +318,8 @@ instance.prototype.incomingData = function (data) {
            try {
             self.SLOTS[data.slot.id - 1].recording = data.slot.recording
             self.setVariable('recordingSlot_' + data.slot.id, data.slot.recording)
+            self.SLOTS[data.slot.id - 1].source = data.slot.source
+            self.setVariable('sourceSlot_' + data.slot.id, data.slot.source)
            } catch (err) {
                self.log('error', '[Livemind Recorder] Error Slot undefined. Does the "Number of Slots to Create" in module settings match the slots in the "Grid Size" in Recorder?')
                self.status(self.STATUS_ERROR, 'ERROR: Does the number of slots to create match the grid size in Recorder settings?');
@@ -551,7 +554,7 @@ instance.prototype.sendCommand = function (cmd) {
 }
 
 // Query the status of all active slots
-instance.prototype.updateStatus = function updateStatus(slf) {
+instance.prototype.updateStatus = function updateStatus() {
     var self = this;
     var cmd = '<status slot="0" uid="' + Date.now() + '" />\r\n'
     self.sendCommand(cmd);
@@ -863,6 +866,10 @@ instance.prototype.initVariables = function() {
 
     for (let index = 1; index < numberOfSLOTS; index++) {
         variables.push({ label: `Slot ${index} Recording`, name: `recordingSlot_${index}` });
+        if (index != 0) {
+            variables.push({ label: `Slot ${index} Source`, name: `sourceSlot_${index}` });
+        }
+       
     };
 
     self.setVariableDefinitions(variables);
