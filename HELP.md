@@ -15,7 +15,7 @@ Livemind Record offers an API through a simple TCP interface to control its oper
 
   - **PORT**: This is the TCP API port where Recorder is listenting for commands. This needs to match the port set in the Recorder settings dialog. (Default: `9099`)
 
-  - **Number of Slots to Create**: Select the number of slots to create based off of the grid layout you are using in Recorder. This should match the **Grid Size** setting in Recorder settings. Options: `(2x2, 3x2, 3x3, 4x3, 4x4, 2+8, 2+14)`
+  - **Number of Slots to Create**: Select the number of slots to create based off of the grid layout you are using in Recorder. This should match the **Grid Size** setting in Recorder settings. Options: `(2x2, 3x2, 3x3, 4x3, 4x4, 2+8, 2+14)` 
 
   - **Verbose Debug to Log**: Check this box to include verbose debug messages in the Companion log tab. Verbose will show the command and response from the API.
   
@@ -49,7 +49,7 @@ Feedback          | Description
 ---
 ## Variables
 
-The following variables are available to Companion.
+The following variables are available to Companion. The number of variables availbale is tied to the number of slots crated. 
 
 Variable                | Description 
 ----------------------- | ----------------------------------- 

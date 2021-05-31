@@ -27,14 +27,35 @@ function instance(system, id, config) {
     instance_skel.apply(this, arguments);
 
     self.SLOTS = []
+    self.CHOICES_SLOT = []
+    self.CHOICES_SLOT_NOALL = []
     self.RECORDING_STATUS = [
         { id: 0, status: 'Stopped'},
         { id: 1, status: 'Recording'}
     ]
 
+    // Fill choices based off of number of slots to be created
+    self.setChoices(self.config.slotsToCreate);
+
     self.initActions(); // export action
 
     return self;
+}
+
+// Setup the choices that are available based off of number of slots
+instance.prototype.setChoices = function (numberOfSLOTS) {
+    var self = this;
+    self.CHOICES_SLOT = []
+    self.CHOICES_SLOT_NOALL = []
+
+    for (let index = 0; index <= numberOfSLOTS; index++) {
+        if (index === 0) {
+            self.CHOICES_SLOT.push({ id: index, label: 'All Connected Slots' });
+        } else {
+            self.CHOICES_SLOT.push({ id: index, label: `Slot ${index}` });
+            self.CHOICES_SLOT_NOALL.push({ id: index, label: `Slot ${index}` });
+        }
+    }
 }
 
 // Create array of slots to hold state data
@@ -262,9 +283,11 @@ instance.prototype.updateConfig = function (config) {
 
     // recreate slots if needed
     if (resetConnection === true) {
+        self.setChoices(self.config.slotsToCreate);
         self.createSlots(self.config.slotsToCreate);
         self.status(self.STATUS_OK)
     }
+    self.initActions();
     self.initVariables();
     self.initPresets();
     self.initFeedbacks();
@@ -354,44 +377,6 @@ instance.prototype.incomingData = function (data) {
 // #### Define Actions ####
 // ########################
 
-instance.prototype.CHOICES_SLOT = [
-    { id: 0, label: 'All Connected Slots' },
-    { id: 1, label: 'Slot 1' },
-    { id: 2, label: 'Slot 2' },
-    { id: 3, label: 'Slot 3' },
-    { id: 4, label: 'Slot 4' },
-    { id: 5, label: 'Slot 5' },
-    { id: 6, label: 'Slot 6' },
-    { id: 7, label: 'Slot 7' },
-    { id: 8, label: 'Slot 8' },
-    { id: 9, label: 'Slot 9' },
-    { id: 10, label: 'Slot 10' },
-    { id: 11, label: 'Slot 11' },
-    { id: 12, label: 'Slot 12' },
-    { id: 13, label: 'Slot 13' },
-    { id: 14, label: 'Slot 14' },
-    { id: 15, label: 'Slot 15' },
-    { id: 16, label: 'Slot 16' },
-];
-
-instance.prototype.CHOICES_SLOT_NOALL = [
-    { id: 1, label: 'Slot 1' },
-    { id: 2, label: 'Slot 2' },
-    { id: 3, label: 'Slot 3' },
-    { id: 4, label: 'Slot 4' },
-    { id: 5, label: 'Slot 5' },
-    { id: 6, label: 'Slot 6' },
-    { id: 7, label: 'Slot 7' },
-    { id: 8, label: 'Slot 8' },
-    { id: 9, label: 'Slot 9' },
-    { id: 10, label: 'Slot 10' },
-    { id: 11, label: 'Slot 11' },
-    { id: 12, label: 'Slot 12' },
-    { id: 13, label: 'Slot 13' },
-    { id: 14, label: 'Slot 14' },
-    { id: 15, label: 'Slot 15' },
-    { id: 16, label: 'Slot 16' },
-];
 
 // Define actions
 instance.prototype.initActions = function () {
@@ -459,7 +444,7 @@ instance.prototype.initActions = function () {
         options: [
             {
                 type   : 'text',
-                label  : 'No options for the command',
+                label  : 'No options for this command',
                 id     : 'slot',  // Need to send 'fake' slot over to make 
                 default: 0        // switch statement make sense in action funciton
             }
@@ -618,7 +603,7 @@ instance.prototype.initFeedbacks = function() {
     },
     feedbacks['slotIsListening'] = {
         type       : 'boolean',
-        label      : 'Slot Listning',
+        label      : 'Slot Listening',
         description: 'If Listning to Audio, set the button to this style.',
         style      : {
             color  : self.rgb(255, 255, 255),
@@ -665,11 +650,6 @@ instance.prototype.initFeedbacks = function() {
 
     self.setFeedbackDefinitions(feedbacks);
 }
-
-// instance.prototype.feedback = function (feedback, bank) {
-//     var self = this;
-
-// }
 
 // ########################
 // #### Define Presets ####
@@ -817,7 +797,7 @@ instance.prototype.initPresets = function () {
             bank    : {
               style  : 'text',
               text   : `Listen\\nSlot ${index}`,
-              size   : 'auto',
+              size   : '18',
               color  : self.rgb(255,255,255),
               bgcolor: self.rgb(0,0,100),
               latch  : true
@@ -890,3 +870,4 @@ instance.prototype.initVariables = function() {
 
 instance_skel.extendedBy(instance);
 exports = module.exports = instance;
+
