@@ -34,6 +34,11 @@ function instance(system, id, config) {
         { id: 1, status: 'Recording'}
     ]
 
+    // Define icons
+    self.ICON_RECORD_ACTIVE = 'iVBORw0KGgoAAAANSUhEUgAAAEgAAAA6CAYAAAATBx+NAAAACXBIWXMAAAsSAAALEgHS3X78AAADPElEQVR4nO2aMW7bQBBFx8kFGCBAXKpjRUQ6AaUbSF262F26OCdQWKWUcwLLJ4huIPEEkqBKHesAQXiEYI2/BjHapSRqloyNeYCBiCFnh39nlruzS0o9V/+LPnmcRETUx89Nut+VHbv0RCcCQYwxEaUQpe+5dYO/nIgWXYjWqkB5nPSIaApxojMfN+IsiChL97sikIsHtCIQIuYO4kiQEdF9GxEVXKA8Tkz6PNSkUVNM6t2m+90mpP9BBYI4y5p0KpA2OVLIvmwfz6RIx57nefPMKKRIwQQ6Is4KaVJUBmv7FStxvbSDMwQy6Tl02AoqUhCBasQxL/MNkWIH61NYQFBjd+axG0SkN9IGwYPjJYzzI0TD+gxxCPeu8eyokoqWCG2K81baYB4n34noE7tsXmhCRD+I6MsF5k2KXZvBufJvy/Xt+w9X8z+/VxfYP0A0xTDPWbPoKdHr56TUMWzK8TQ2bQ0k50nSKfbVkVoZhJEShyr2MnY9gg9iSAt0w36v0NtSE8QqU9jmKcV9uAgxgfI4cS0ffgYSxzJFG1Ui+CKCZASl7HeB3hXtUcYN2uBjDvelMZIC8aXESnjc8TF2pJnYskZSID7LzSV7soYUbdX50phQE0VC2PvWUJL0HCkmRkiBXgUq0BFUoCOEFKjvWFSGYBOgGPeMpED8U/uRiLaC9n1s0VadL42RFIhHyxhLgdAsHPMtsciVFIjPRezWzlywDc7cs0PCfWmMdLnjL3O2QKmDl0AkeCptoORRnW+V6X73TqoR6UGaLxx7nrKEBJmnoM99uAhpge7Rs1VmGDQlU20OmzN2vYQPYogKhI08V7Qs0bMSIs1ha+n4v0x6MzHUrsbSsWC0pdch6jhNtp4zRI5rx2SV7nejC10/INREceJItagyWA8QCaf0dol7B8wGv2ci6P8zXW0cFoiGBSKq7yiN5JjP2LrS1FMdeHkbh5YTtp5LCLB1zH6HmCEPjzz/MreeLTjZ8UuyiAWMoJPQJzxaOx+Ux8ldw8GZU+JrJfo599H2ASp7Tuhzg2qjGbce2zoXZOnsjCLGp+oxPNeXqXr8ro3SiaIoiqIoiqIoiqIoiqIoiqJ0AxH9A3ws4ocwSlYLAAAAAElFTkSuQmCC';
+    self.ICON_RECORD_STANDBY = 'iVBORw0KGgoAAAANSUhEUgAAAEgAAAA6CAYAAAATBx+NAAAACXBIWXMAAAsSAAALEgHS3X78AAAC40lEQVR4nO2awXHbMBBFf1KBS/BNJ43lCihXELsDuwInFWhUQawKrA6kVJCwAsnDk24sgSVkkPlMOBuItMUPyOPZdzLp0QL4XCwWC8Dp59O59Ckn00sAtwCuAIS/ZwAu+O8GwB5ADeAFwLY4VPU5+pldoHIyvQfwSEHeQhBsVRyqdc7+ZhOonEyDt3ynt4wheNK34lBtc/Q7uUDlZBqmzTOnk5Ig0ENxqJqU/U8qEMX5OTCdwtT5Qc9o40wbj7684rc3KUVKJhCD8K4TeLuEAa0ArIeCL0X+yrh1zNZ1qiCeRKABz3kCsHzrV6fNBcWyJPOkVAJtIjGnYcwYFVwZ7J8j3hRSgbsxtmPIBeIANuZ1wy+8F7Uxo4dake7Uq5tUIE6DXWQpD+L8Erc1p0hdasYj2VT7rDJE7iPiLNXiBGhzaV5fsg8y1AI9mueaQTkVT53U4FgfRiETiHEh5j3JchTa/s+L2BcJSg+KZco5tgOxNmRZu1KgwjxvU28D8M+LrEi2LyejFMi69YvQ9hC2rXc5xWxOIl+5erBtxbYkJ6FexT4cLtAALtAAKQWSBcpztqUUyAbKK6HtIWxbsgVCKZDdqatLrH3YtiRVA4gFKs3zBUsfSWEbdlm3fTkZmUCsw9jMWbpxPIJto1HWhNRBemWe5+VkGiuRSqDt+UAfRqEWaB3xooVyd91CmwvzumEfZEgF4smC/YJ/zsVYbZTQOWuzNlfq041URftdJDfZs2Y8agA8TtrE7BeH6nqM7RipEsWHyFQLA9qNWdn425j4DduUk/Lg8NjJA5jIvbpWzQL9IhKQoT4xsaQ+eu4TCawnb5m31O0gO+XbgkngsQsPScVBpssLMwZU9Uq250FkMnGQYzfPAdxEiutjWKb2nJasF6i4Ai1OPLtqa8/LnLfNznIFj3nMLWPMvCfG1AzoZa5DAMvZ7ihaGKv+3lHMMX0cx3Ecx3Ecx3Ecx3Ecx3Ec590A4DcpOPT+CT226QAAAABJRU5ErkJggg=='
+    self.ICON_STOP = 'iVBORw0KGgoAAAANSUhEUgAAAEgAAAA6CAYAAAATBx+NAAAACXBIWXMAAAsSAAALEgHS3X78AAAAq0lEQVR4nO3ZsQ0CMQyGUYMY6KZyzyT0mYYRbiNo6P+CMwL03gCO8kWpXPCW05H5uvvxDc+x1jrsXuejBv0rgQKBgsvw/GtV7cNnbFV1mxo+HWhfa90nD+juyfG+WCJQIFAgUCBQIFAgUCBQIFAgUCBQIFAgUCBQIFAgUCBQIFAgUCBQIFAgUCBQML0X26b3Vq/F4ZjpQGMbz0/xxQKBAoEAAAAAAAB+X1U9AUnADP3h8e7aAAAAAElFTkSuQmCC'
+
     // Fill choices based off of number of slots to be created
     self.setChoices(self.config.slotsToCreate);
 
@@ -59,13 +64,13 @@ instance.prototype.setChoices = function (numberOfSLOTS) {
 }
 
 // Create array of slots to hold state data
-// numofSlots is the number of slots to create
-instance.prototype.createSlots = function (numOfSlots) {
+// numberOfSLOTS is the number of slots to create
+instance.prototype.createSlots = function (numberOfSLOTS) {
     var self = this;
     self.SLOTS = [];
 
-    self.log('debug', `[Livemind Recorder] Creating ${numOfSlots} slots`);
-    for (let index = 0; index <= numOfSlots; index++) {
+    self.log('debug', `[Livemind Recorder] Creating ${numberOfSLOTS} slots`);
+    for (let index = 0; index <= numberOfSLOTS; index++) {
         self.SLOTS.push({
             id       : index,
             label    : `Slot ${index}`,
@@ -199,7 +204,7 @@ instance.prototype.initTCP = function () {
             self.debug('Connected');
             self.setVariable('status', 'Connected');
             self.log('info', '[Livemind Recorder] Connected to Livemind Recorder at IP ' + self.config.host + ' on port ' + self.config.port);
-            self.updateStatus();
+            //self.updateStatus();
         });
         
         // separate buffered stream into lines with responses
@@ -224,7 +229,7 @@ instance.prototype.initTCP = function () {
 
                try {
                     var response = xmlParser.parse(line, xmlOptions, false);
-                    //console.log(response)`
+                    //console.log(response)
                 }
                 catch(err) {
                     self.log('error', '[Livemind Recorder] XML Parser error: ' + err.message)
@@ -277,7 +282,7 @@ instance.prototype.updateConfig = function (config) {
     self.log('info', '[Livemind Recorder] Update Config Saved.')
 
     if (resetConnection === true || self.socket === undefined) {
-        self.log('info', '[Livemind Recorder] Update Config: Reinitializing socket');
+        self.log('warn', '[Livemind Recorder] Update Config: Reinitializing socket');
         self.initTCP();
     }
 
@@ -313,7 +318,7 @@ instance.prototype.incomingData = function (data) {
             self.setVariable('version', data.hello.release);
             self.setVariable('apiVersion', (data.hello.protocol = 1 ? '1.0.0' : data.hello.protocol));
             self.subscribeEvents();
-           // self.updateStatus();
+            self.updateStatus();
         }
 
         // yes 'succes' is spelled wrong, this is how the API returns it
@@ -327,9 +332,12 @@ instance.prototype.incomingData = function (data) {
             self.log('error', '[Livemind Recorder] Command failure: ' + data.failure.reason + ' / uid=' + data.failure.uid)
         }
 
-        if (data.status) {
+        if (data.status || data.status === '') {
             if (data.status.uid) {
-                self.log('info', '[Livemind Recorder] Gretting all active slots status')
+                self.log('info', '[Livemind Recorder] Receiving all slots status')
+            } else {
+                console.log(self.SLOTS)
+                self.log('info', '[Livemind Recorder] Finished receiving all slots status')
             }
             // Do nothing 
             // In the XML returned from the API, <status> tags surround a 
@@ -339,23 +347,22 @@ instance.prototype.incomingData = function (data) {
         if (data.slot) {
            // if (self.config.verbose) { self.log('debug', '[Livemind Recorder] Slot status received') }
            try {
-            self.SLOTS[data.slot.id - 1].recording = data.slot.recording
+            self.SLOTS[data.slot.id].recording = data.slot.recording
             self.setVariable('recordingSlot_' + data.slot.id, data.slot.recording)
-            self.SLOTS[data.slot.id - 1].source = data.slot.source
+            self.SLOTS[data.slot.id].source = data.slot.source
             self.setVariable('sourceSlot_' + data.slot.id, data.slot.source)
            } catch (err) {
                self.log('error', '[Livemind Recorder] Error Slot undefined. Does the "Number of Slots to Create" in module settings match the slots in the "Grid Size" in Recorder?')
                self.status(self.STATUS_ERROR, 'ERROR: Does the number of slots to create match the grid size in Recorder settings?');
                self.setVariable('status', 'Error');
            }
-           
         }
 
         if (data.recording) {
             self.log('info', '[Livemind Recorder] Recording status update received')
-            self.SLOTS[data.recording.slot - 1].recording = data.recording.state;
+            self.SLOTS[data.recording.slot].recording = data.recording.state;
             self.setVariable('recordingSlot_' + data.recording.slot, data.recording.state)
-            self.checkFeedbacks('slotIsRecording');
+            self.checkFeedbacks();
         }
 
         if (data.recording_all) {
@@ -390,7 +397,7 @@ instance.prototype.initActions = function () {
                 type        : 'multiselect',
                 label       : 'Select Slot [1-16, or All]',
                 id          : 'slot',
-                tooltip     : 'Select the slot to start recording, or select All Coonected Slots. \r\nMinimum selection is 1 item, add one item to remote the first item.',
+                tooltip     : 'Select the slot to start recording, or select All Coonected Slots. \r\n(Minimum selection is 1 item, add one item to remove the first item.)',
                 default     : [ 0 ],
                 choices     : self.CHOICES_SLOT,
                 minSelection: 1
@@ -408,7 +415,7 @@ instance.prototype.initActions = function () {
                 type        : 'multiselect',
                 label       : 'Select Slot [1-16, or All]',
                 id          : 'slot',
-                tooltip     : 'Select the slot to stop recording, or select All Connected Slots \r\nMinimum selection is 1 item, add one item to remote the first item.',
+                tooltip     : 'Select the slot to stop recording, or select All Connected Slots \r\n(Minimum selection is 1 item, add one item to remove the first item.)',
                 default     : [ 0 ],
                 choices     : self.CHOICES_SLOT,
                 minSelection: 1
@@ -440,7 +447,7 @@ instance.prototype.initActions = function () {
         ]
     },
     actions['refreshStatus'] = {
-        label: 'Refresh',
+        label: 'Refresh status of all slots',
         options: [
             {
                 type   : 'text',
@@ -569,12 +576,11 @@ instance.prototype.initFeedbacks = function() {
                 default     : 0,
                 choices     : self.CHOICES_SLOT
         }],
-        callback: function (feedback, bank) {
+        callback: function (feedback) {
             if (self.SLOTS[feedback.options.slot].recording == 1) {
-                return true;
-            } else {
-                return false;
+                return true
             }
+            return false
         }
     },
     feedbacks['slotIsStopped'] = {
@@ -593,12 +599,11 @@ instance.prototype.initFeedbacks = function() {
             default: 0,
             choices: self.CHOICES_SLOT
         }],
-        callback: function (feedback, bank) {
+        callback: function (feedback) {
             if (self.SLOTS[feedback.options.slot].recording == 0) {
-                return true;
-            } else {
-                return false;
-            }
+                return true
+            } 
+            return false
         }
     },
     feedbacks['slotIsListening'] = {
@@ -616,14 +621,13 @@ instance.prototype.initFeedbacks = function() {
                 tooltip: 'Select the slot this feedback monitors',
                 choices: self.CHOICES_SLOT_NOALL
         }],
-        callback: function (feedback, bank) {
+        callback: function (feedback) {
             if (self.SLOTS[feedback.options.slot].listening == 1) {
-                return true;
-            } else {
-                return false;
+                return true
             }
+            return false
         }
-    }
+    },
     feedbacks['slotIsStopListening'] = {
         type       : 'boolean',
         label      : 'Slot Stop Listening',
@@ -639,14 +643,13 @@ instance.prototype.initFeedbacks = function() {
                 tooltip     : 'Select the slot this feedback monitors',
                 choices     : self.CHOICES_SLOT_NOALL
         }],
-        callback: function (feedback, bank) {
+        callback: function (feedback) {
             if (self.SLOTS[feedback.options.slot].listening == 0) {
-                return true;
-            } else {
-                return false;
+                return true
             }
+            return false
         }
-    };
+    }
 
     self.setFeedbackDefinitions(feedbacks);
 }
@@ -732,10 +735,11 @@ instance.prototype.initPresets = function () {
             label   : `startRecSlot${index}`,
             bank    : {
               style       : 'png',
-              text        : `Rec\\n${index}`,
-              size        : 'auto',
-              png64       : self.ICON_REC_INACTIVE,
-              pngalignment: 'center:center',
+              text        : `Rec ${index}`,
+              size        : '18',
+              png64       : self.ICON_RECORD_ACTIVE,
+              pngalignment: 'center:top',
+              alignment   : 'center:bottom',
               color       : self.rgb(255,255,255),
               bgcolor     : self.rgb(0,0,0)
             },
@@ -764,10 +768,11 @@ instance.prototype.initPresets = function () {
             label   : `stopRecSlot${index}`,
             bank    : {
                 style       : 'png',
-                text        : `Stop\\n${index}`,
-                size        : 'auto',
-                // png64       : self.ICON_STOP_INACTIVE,
-                pngalignment: 'center:center',
+                text        : `Stop ${index}`,
+                size        : '18',
+                png64       : self.ICON_STOP,
+                pngalignment: 'center:top',
+                alignment   : 'center:bottom',
                 color       : '16777215',
                 bgcolor     : self.rgb(0,0,0)
             },
@@ -855,17 +860,6 @@ instance.prototype.initVariables = function() {
     self.setVariableDefinitions(variables);
     
 }
-
-
-
-// module.exports = { 
-    
-//     ICON_RECORD_ACTIVE: 'iVBORw0KGgoAAAANSUhEUgAAAEgAAAA6BAMAAADhKQK+AAAACXBIWXMAAAsSAAALEgHS3X78AAAALVBMVEUAAAC/Hi6/Hi6/Hi6/Hi6/Hi6/Hi6/Hi6/Hi6/Hi6/Hi6/Hi6/Hi6/Hi6/Hi4HsQhdAAAADnRSTlMAEDBAYHCAj5+vv8/f7ycfOlsAAAEaSURBVEjHY2AYBQMMmI2NDQgoYap+BwTbFfCpYdn3DgxeO+AxZx3QlLQ0oGmvcJvl++6NI4gWOffuCi417O/eOjCopKU5MbDce1eAQ1Hdu4mMOSAnHROQfPcch6uBErEQh18FasDudt13CRLvoKCR/d0lrIrWvWTcB1P0WmDeK+y2XeR4BwcNsljt437nEIdQ9JTl3QYsivTeMN5DKHorcO4RtgB4wvYOCSTEYQuEfQ95kBUdkHuNRdG7DXrIih5xv8OSjt4V+CEresL+zgCLooQ8ZEXP2AaDIiIcTlQQEBeYdU+JiBaiIpiopEJUoiMq+QIzQgHhjEBUliIqcxKXzUEFRiCIFsVTYBBX9BBViBFXHBJXsI4CmgMA2gaVaGNM1LIAAAAASUVORK5CYII=', 
-  
-//     ICON_RECORD_STANDBY: 'iVBORw0KGgoAAAANSUhEUgAAAEgAAAA6BAMAAADhKQK+AAAACXBIWXMAAAsSAAALEgHS3X78AAAALVBMVEUAAAC/Hi6/Hi6/Hi6/Hi6/Hi6/Hi6/Hi6/Hi6/Hi6/Hi6/Hi6/Hi6/Hi6/Hi4HsQhdAAAADnRSTlMAECAwUGBwgJ+vv8/f7xg1Ib4AAADvSURBVEjHY2AYBQMLRKpWrZruiF+N5zswmIJPjc87KDiCW43ku3c3nBgYVHrfvZuISw3zuXdHIayYd28McCiyfXcNxsx9dxmHQfdew7Uz73uL3SiZdxsRHOl3B7EqmvdaAMFh3PcSmxoWVGfYvnPAoojnXQIyl+3dASyK/N6g8s89weakp6j8OCyOYnx3AVWA950AFnc3oApwYHE5O7oYy7sCDEVc7xRQBZjeTcCiCF3k3YKBV0SEw4kKAqICk6hoISqCiUsqRCU6opIvURmBuCxFVOYkKpsTV2AQVfQQV4gRVxwCC9ZKwgXrKKA5AADICI5kA+bEzgAAAABJRU5ErkJggg==',
-  
-//     ICON_STOP: 'iVBORw0KGgoAAAANSUhEUgAAAEgAAAA6BAMAAADhKQK+AAAACXBIWXMAAAsSAAALEgHS3X78AAAAElBMVEUAAABtbnFtbnFtbnFtbnFtbnEsIS3fAAAABXRSTlMAQIC/z9DMKFoAAAAzSURBVEjHY2AYBUMeMIViAIWBVxQiiAJcsSoKRhUwHVU0qmhUEe0VEZU5B1+pMgqGHAAA/fJVZzjiQe8AAAAASUVORK5CYII='
-// }
 
 
 instance_skel.extendedBy(instance);
