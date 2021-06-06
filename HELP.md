@@ -16,6 +16,8 @@ Livemind Record offers an API through a simple TCP interface to control its oper
   - **PORT**: This is the TCP API port where Recorder is listenting for commands. This needs to match the port set in the Recorder settings dialog. (Default: `9099`)
 
   - **Number of Slots to Create**: Select the number of slots to create based off of the grid layout you are using in Recorder. This should match the **Grid Size** setting in Recorder settings. Options: `(2x2, 3x2, 3x3, 4x3, 4x4, 2+8, 2+14)` 
+  
+  - **Remove machine name from NDI source name**: NDI prepends source names with the machine name where the source. This can often cause source names to be very long. Select this option to remove the machine name from the source name. [`COMPUTER (Test)` becomes `(Test)` ]
 
   - **Verbose Debug to Log**: Check this box to include verbose debug messages in the Companion log tab. Verbose will show the command and response from the API.
   
@@ -26,8 +28,8 @@ The following actions are available to assign to a button.
 
 Action                   | Description                  
 -----------------------: | ---------------------------- 
-**Start Recording Slot** | Starts recording in the specified slot number `[1-16]` or `All` active slots
-**Stop Recording Slot**  | Stops recording in the specified slot number `[1-16]` or `All` active slots
+**Start Recording Slot** | Starts recording in the specified slot number `[1-16]` or `All` active slots. Mulitple slots can be selected.
+**Stop Recording Slot**  | Stops recording in the specified slot number `[1-16]` or `All` active slots. Multiple slots can be selected. 
 **Start Listening Slot** | Starts listening to audio on the specified slot number `[1-16]`.   **Note:** Only one slot can be listented to at a time and the audio will come from the machine where Recorder is running
 **Stop Listening Slot**  | Stops listening to audio on the specified slot `[1-16]` 
 **Refresh**              | Forces a refresh of the current status of all record slots and updates feedback and variables in Companion 
@@ -40,7 +42,8 @@ The following feedback has been implemented allowing Companion to indicate the s
 Feedback          | Description                        
 ----------------- | ---------------------------------- 
  **Slot Recording**| Set the button color if a slot `[1-16 or All]` is recording
- **Slot Stopped**  | Set the button color if a slot `[1-16 or All]` is stopped (not recording) 
+ **Slot Stopped**  | Set the button color if a slot `[1-16 or All]` is stopped (not recording)
+ **Slot Not Ready**| Set the button style when a slot `[1-16]` has a source of `none` and is not ready to record 
  **Slot Listening**| Set the button color if listening to slot `[1-16]` audio
  **Slot Stop Listening**| Set the button color when listening stops for slot `[1-16]` audio
 
@@ -70,6 +73,7 @@ Preset          | Description
 **Stop All**    | Stops recording on all available channels, with feedback to change background color 
 **Record Slot `X`** | Starts recording on the indicated slot `[1-16]`
 **Stop Slot `X`**   | Stops recording on the indicated slot `[1-16]`
+**Toggle Record Slot `X`** | Creates a toggle record/stop button for indicated slot `[1-16]` with the name of the source as button text
 **Toggle Listen Slot `X`** | Toggles listening on/off for the selected slot `[1-16]`
 
 ---

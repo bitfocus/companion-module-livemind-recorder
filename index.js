@@ -35,9 +35,10 @@ function instance(system, id, config) {
     ]
 
     // Define icons
-    self.ICON_RECORD_ACTIVE = 'iVBORw0KGgoAAAANSUhEUgAAAEgAAAA6CAYAAAATBx+NAAAACXBIWXMAAAsSAAALEgHS3X78AAADPElEQVR4nO2aMW7bQBBFx8kFGCBAXKpjRUQ6AaUbSF262F26OCdQWKWUcwLLJ4huIPEEkqBKHesAQXiEYI2/BjHapSRqloyNeYCBiCFnh39nlruzS0o9V/+LPnmcRETUx89Nut+VHbv0RCcCQYwxEaUQpe+5dYO/nIgWXYjWqkB5nPSIaApxojMfN+IsiChL97sikIsHtCIQIuYO4kiQEdF9GxEVXKA8Tkz6PNSkUVNM6t2m+90mpP9BBYI4y5p0KpA2OVLIvmwfz6RIx57nefPMKKRIwQQ6Is4KaVJUBmv7FStxvbSDMwQy6Tl02AoqUhCBasQxL/MNkWIH61NYQFBjd+axG0SkN9IGwYPjJYzzI0TD+gxxCPeu8eyokoqWCG2K81baYB4n34noE7tsXmhCRD+I6MsF5k2KXZvBufJvy/Xt+w9X8z+/VxfYP0A0xTDPWbPoKdHr56TUMWzK8TQ2bQ0k50nSKfbVkVoZhJEShyr2MnY9gg9iSAt0w36v0NtSE8QqU9jmKcV9uAgxgfI4cS0ffgYSxzJFG1Ui+CKCZASl7HeB3hXtUcYN2uBjDvelMZIC8aXESnjc8TF2pJnYskZSID7LzSV7soYUbdX50phQE0VC2PvWUJL0HCkmRkiBXgUq0BFUoCOEFKjvWFSGYBOgGPeMpED8U/uRiLaC9n1s0VadL42RFIhHyxhLgdAsHPMtsciVFIjPRezWzlywDc7cs0PCfWmMdLnjL3O2QKmDl0AkeCptoORRnW+V6X73TqoR6UGaLxx7nrKEBJmnoM99uAhpge7Rs1VmGDQlU20OmzN2vYQPYogKhI08V7Qs0bMSIs1ha+n4v0x6MzHUrsbSsWC0pdch6jhNtp4zRI5rx2SV7nejC10/INREceJItagyWA8QCaf0dol7B8wGv2ci6P8zXW0cFoiGBSKq7yiN5JjP2LrS1FMdeHkbh5YTtp5LCLB1zH6HmCEPjzz/MreeLTjZ8UuyiAWMoJPQJzxaOx+Ux8ldw8GZU+JrJfo599H2ASp7Tuhzg2qjGbce2zoXZOnsjCLGp+oxPNeXqXr8ro3SiaIoiqIoiqIoiqIoiqIoiqJ0AxH9A3ws4ocwSlYLAAAAAElFTkSuQmCC';
-    self.ICON_RECORD_STANDBY = 'iVBORw0KGgoAAAANSUhEUgAAAEgAAAA6CAYAAAATBx+NAAAACXBIWXMAAAsSAAALEgHS3X78AAAC40lEQVR4nO2awXHbMBBFf1KBS/BNJ43lCihXELsDuwInFWhUQawKrA6kVJCwAsnDk24sgSVkkPlMOBuItMUPyOPZdzLp0QL4XCwWC8Dp59O59Ckn00sAtwCuAIS/ZwAu+O8GwB5ADeAFwLY4VPU5+pldoHIyvQfwSEHeQhBsVRyqdc7+ZhOonEyDt3ynt4wheNK34lBtc/Q7uUDlZBqmzTOnk5Ig0ENxqJqU/U8qEMX5OTCdwtT5Qc9o40wbj7684rc3KUVKJhCD8K4TeLuEAa0ArIeCL0X+yrh1zNZ1qiCeRKABz3kCsHzrV6fNBcWyJPOkVAJtIjGnYcwYFVwZ7J8j3hRSgbsxtmPIBeIANuZ1wy+8F7Uxo4dake7Uq5tUIE6DXWQpD+L8Erc1p0hdasYj2VT7rDJE7iPiLNXiBGhzaV5fsg8y1AI9mueaQTkVT53U4FgfRiETiHEh5j3JchTa/s+L2BcJSg+KZco5tgOxNmRZu1KgwjxvU28D8M+LrEi2LyejFMi69YvQ9hC2rXc5xWxOIl+5erBtxbYkJ6FexT4cLtAALtAAKQWSBcpztqUUyAbKK6HtIWxbsgVCKZDdqatLrH3YtiRVA4gFKs3zBUsfSWEbdlm3fTkZmUCsw9jMWbpxPIJto1HWhNRBemWe5+VkGiuRSqDt+UAfRqEWaB3xooVyd91CmwvzumEfZEgF4smC/YJ/zsVYbZTQOWuzNlfq041URftdJDfZs2Y8agA8TtrE7BeH6nqM7RipEsWHyFQLA9qNWdn425j4DduUk/Lg8NjJA5jIvbpWzQL9IhKQoT4xsaQ+eu4TCawnb5m31O0gO+XbgkngsQsPScVBpssLMwZU9Uq250FkMnGQYzfPAdxEiutjWKb2nJasF6i4Ai1OPLtqa8/LnLfNznIFj3nMLWPMvCfG1AzoZa5DAMvZ7ihaGKv+3lHMMX0cx3Ecx3Ecx3Ecx3Ecx3Ec590A4DcpOPT+CT226QAAAABJRU5ErkJggg=='
-    self.ICON_STOP = 'iVBORw0KGgoAAAANSUhEUgAAAEgAAAA6CAYAAAATBx+NAAAACXBIWXMAAAsSAAALEgHS3X78AAAAq0lEQVR4nO3ZsQ0CMQyGUYMY6KZyzyT0mYYRbiNo6P+CMwL03gCO8kWpXPCW05H5uvvxDc+x1jrsXuejBv0rgQKBgsvw/GtV7cNnbFV1mxo+HWhfa90nD+juyfG+WCJQIFAgUCBQIFAgUCBQIFAgUCBQIFAgUCBQIFAgUCBQIFAgUCBQIFAgUCBQML0X26b3Vq/F4ZjpQGMbz0/xxQKBAoEAAAAAAAB+X1U9AUnADP3h8e7aAAAAAElFTkSuQmCC'
+    self.ICON_RECORD_ACTIVE = 'iVBORw0KGgoAAAANSUhEUgAAAEgAAAA6CAYAAAATBx+NAAAACXBIWXMAAAsSAAALEgHS3X78AAAC1klEQVR4nO2Z323bQAzG2S4Qj6A86UloMoGkCexMUHuC2BM4nsDuBLYniDNBdBNEhZ70VI2gEQoaH4uDYKD5czzBAH+AIci58E6feRTJI8P4Et/GlM+l2YyIciK6I6IEH6bDp+ZheducxlrjKAK5NFsS0aMnCNNDEIJgE+9vLNYxb5unyEuNK5BLs4KI9p4w7BlHIqrytukHY1kgHj8lojm+ZqEWedtUsdYcTSCXZnOIQxBmlbdN59KMvYW32g/Pa1is3zwub5vapRkLusU4gkiHGOuOIpAnTg9hDvhuPdhml2Cv2Xj/s4WQUURSFwiB+BnilHjgZ2yfj8Db6gGCvkKkB+0ArioQtsYbHqZEEH5FEP4MNezcwQ6Lfs9bVesZvmsZBmuIswkgDnnC1LA5wRxqqAkE7+GY0eH1vPyiOALbWMIme84cc6mg6UGPuG7wACF/6TVsbgZzBUdTIHkln7w8JiRz2Pbnug6B8OsmXgI4VZhmCtv8dku0tpmWB8liHa4hYs8QsSlzXJVA/+oolBcqaNoWtD1ILT/xkBpOw0vVBJKqPPEeQIPe89ZaYwLtRPGGi00t47B9o2WfInhQMbi/tjn0ajGXZm+IC7fIU7aBp1ghD/rD4uRtcx/Y/hnNLfaCKyd0h8CxqIdNSUBf/jP+02gKJL0aKQN+BbQttsS2Wl9ITSC0IHZScaO4DNEqrWBLOgU7zXaHdj9oghhx7gAiZoToB828DuXtsJ8dEtXXPBZe4naPByvhWR9lh0A883rbpaY4FCEPklxlgds9ejkrCPWedukJQqxcmj154iw0cywh5qmG/PITbBVu3leowosLxWaHeNOh5tpia/YQJ8phYuxzsQQi+cndEXlMNRhbQJCfXsyqIE6MGu/MWCerBd5C763GKxz9RDswFMY+m0+8Q8NLW0wOD6N5jGEYhmEYhmEYhmEYhmEYhmEYhmEYhmGEhIj+ArCo+6Y/6lj3AAAAAElFTkSuQmCC';
+    self.ICON_RECORD_NOTAVAIL = 'iVBORw0KGgoAAAANSUhEUgAAAEgAAAA6CAYAAAATBx+NAAAACXBIWXMAAAsSAAALEgHS3X78AAAC1klEQVR4nO2ZzW0bQQyFmaQAq4R1BbFvuWVUgeQKIldgqQI/VyCnAksVWD7m5HUF3lQQpYMtIaDwaAwWAuKf4QgC+AHCQvKas/OW5Aw5EgQf4tMh5QMwFZHvInImIg0/ypafTkSeAGwO9YwHEQjAXESuMkGUnoIIBRtlf1Ox1gBQ+VHrCgQgichdJox6xlpEWgD94F4VSO+fiMiMP6tQlwDaWs9cTSAAM4ojFGYBYAtAvUVD7WvmNSrWb70PQAdABV3yPqFIqxrPXUWgTJyewqz42/UgzPahXnOT/c+SQlYRyV0gJuJ7ijPmhO8ZPm9Bw+qCgj5SpAvvBO4qEEPjmZMZMwk/Mgm/h452zmhHRT/XUPWaw2cvw+Sa4twUEEcyYTraHHEMN9wEovdozthyeZ5/UBxDbcxpUz1nxrFc+OJlOKWkb/abJuWUUs+8U9B80u3BX1vZ2rb9VdD+C54hZkvyJtvHlGRG2/lYxXERiC7fZBvAicMwE9rW1a3xCjMvD7KHfeK1RO4ZYjZtjKMS6AWWF0dn2/ASyN6u2/4kw2o4Dy91E8iq8iabgAd9Vr91HgN4h9iJFptexmn7xMu+VPCgNPh+bGP41WIAnpkXTrlPWRYeYsF90B8VB8B5Yfs7PEPsgVfd0K0K56KeNm0D+vCf+9+Np0DWq7ni9WdB22bLbLv1hTyLVV3ib63iZnFZolXa0pZ1Cm492x3e/aARc8SuA8icUaIfNM06lKfDfnZJXJd5PviYX+84sTE9663cMhFPs9722FMcqVRqdPQe4cS0l7OgUK9pl24oxIKhZeJceu6xjJqnGvbmRwwVnXDLKjztKTa3zDdb1lxLhmZPcaocJtY+F2soUr65W3Mf0w7uTRTkR5azWopTo8bbcaiT1cRV6LXVeMujn2oHhsahz+ab7NBwX4jZ4WE1jwmCIAiCIAiCIAiCIAiCIAiCIAiCIAiCkojIP4R+/EP6mAG0AAAAAElFTkSuQmCC';
+    self.ICON_RECORD_STANDBY = 'iVBORw0KGgoAAAANSUhEUgAAAEgAAAA6CAYAAAATBx+NAAAACXBIWXMAAAsSAAALEgHS3X78AAABfElEQVR4nO3Zz03DMBgF8AcTMEI55WTRDUwngG7QDSgTVGxANygT0A2abFDkk09khGwAiuQeaMqfBvs5kd7vWLVfPz0ljv0FIiIyXBe5O6sKMwVwD+AGwFX4uAHwBmBrvdvn7C9bQFVhFgBWACa/fLUG8GS925Ba+4IeUFWY9ip5BXB75k9LAHPrXZOotZOoAYVwdgCmPUu0t9uMGRItoAjhHFBDumT8SbCMEA5CjWWUjv6AcgVVhWkX4vfIZa+td3Xkmh2sK2gxkpodrIDuRlKzgxVQjLWHUbMjeUBVYc7d7wyi9gHzKTZKjIBS7leS74VYj/mPFHWtd8n7Z91iKU7klFM+K6CXkdTsYAW0ibxeNKFmcpSAwsFyHbHkmnVYZY87dj3mQMdK690sfnensfdB838urvtQgybXRHHVY2TxbL17TNTWt3LOpNtb7SEM7H+yDWtOmaPPIbzVmIR16Xh4X4f1JvnMR0RERERERERERERERERERERGCcAnoENUyFoumfwAAAAASUVORK5CYII=';
+    self.ICON_STOP = 'iVBORw0KGgoAAAANSUhEUgAAAEgAAAA6CAYAAAATBx+NAAAACXBIWXMAAAsSAAALEgHS3X78AAAAdElEQVR4nO3ZsQ3DQAwEwZfhxlSZv3QlzjeiDAszBRyBTbkAfuiYPr333v+8/54c//oM748Gek2OP4FAQaAgUBAoCBQECgIFgYJAQaAgUBAoCBQECgIFgYJAQaAgUBAoCBTuePucN9wAAAAAAAAAAHigtdYFKNgFdrdHhIUAAAAASUVORK5CYII=';
 
     // Fill choices based off of number of slots to be created
     self.setChoices(self.config.slotsToCreate);
@@ -134,6 +135,13 @@ instance.prototype.config_fields = function () {
                 { id: 16, label: '16 Slots (4x4) (2+8) (2+14)' }
             ] 
         },
+        {
+            type   : 'checkbox',
+            id     : 'truncateSource',
+            width  : 6,
+            label  : 'Remove machine name from NDI source name. [ COMPUTER (Test) becomes (Test) ]',
+            default: false
+        },
         // {
         //     type    : 'number',
         //     id      : 'pollInterval',
@@ -161,14 +169,14 @@ instance.prototype.init = function () {
 
     debug = self.debug;
     log = self.log;
-   
+    
+    self.status(self.STATUS_UNKNOWN);
+
     self.createSlots(self.config.slotsToCreate);
     self.initVariables();
     self.initFeedbacks();
     self.initPresets();
     self.initTCP();
-    //self.updateStatus();
-    
 }
 
 // Initialize TCP connection
@@ -204,7 +212,6 @@ instance.prototype.initTCP = function () {
             self.debug('Connected');
             self.setVariable('status', 'Connected');
             self.log('info', '[Livemind Recorder] Connected to Livemind Recorder at IP ' + self.config.host + ' on port ' + self.config.port);
-            //self.updateStatus();
         });
         
         // separate buffered stream into lines with responses
@@ -279,19 +286,20 @@ instance.prototype.updateConfig = function (config) {
 
     // save new config
     self.config = config;
-    self.log('info', '[Livemind Recorder] Update Config Saved.')
-
-    if (resetConnection === true || self.socket === undefined) {
-        self.log('warn', '[Livemind Recorder] Update Config: Reinitializing socket');
-        self.initTCP();
-    }
+    self.log('info', '[Livemind Recorder] Updated Config Saved.')
 
     // recreate slots if needed
     if (resetConnection === true) {
         self.setChoices(self.config.slotsToCreate);
         self.createSlots(self.config.slotsToCreate);
-        self.status(self.STATUS_OK)
     }
+
+    if (resetConnection === true || self.socket === undefined) {
+        self.log('warn', '[Livemind Recorder] Update Config: Reinitializing socket');
+        self.initTCP();
+        self.subscribeEvents();
+    }
+
     self.initActions();
     self.initVariables();
     self.initPresets();
@@ -336,8 +344,9 @@ instance.prototype.incomingData = function (data) {
             if (data.status.uid) {
                 self.log('info', '[Livemind Recorder] Receiving all slots status')
             } else {
-                console.log(self.SLOTS)
+                //console.log(self.SLOTS)
                 self.log('info', '[Livemind Recorder] Finished receiving all slots status')
+                self.checkFeedbacks();
             }
             // Do nothing 
             // In the XML returned from the API, <status> tags surround a 
@@ -345,17 +354,28 @@ instance.prototype.incomingData = function (data) {
         }
 
         if (data.slot) {
-           // if (self.config.verbose) { self.log('debug', '[Livemind Recorder] Slot status received') }
-           try {
-            self.SLOTS[data.slot.id].recording = data.slot.recording
-            self.setVariable('recordingSlot_' + data.slot.id, data.slot.recording)
-            self.SLOTS[data.slot.id].source = data.slot.source
-            self.setVariable('sourceSlot_' + data.slot.id, data.slot.source)
-           } catch (err) {
-               self.log('error', '[Livemind Recorder] Error Slot undefined. Does the "Number of Slots to Create" in module settings match the slots in the "Grid Size" in Recorder?')
-               self.status(self.STATUS_ERROR, 'ERROR: Does the number of slots to create match the grid size in Recorder settings?');
-               self.setVariable('status', 'Error');
-           }
+            // if (self.config.verbose) { self.log('debug', '[Livemind Recorder] Slot status received') }
+            var truncatedSource = ''
+
+            try {
+                // Assign Recording status to SLOTS
+                self.SLOTS[data.slot.id].recording = data.slot.recording
+                self.setVariable('recordingSlot_' + data.slot.id, data.slot.recording)
+
+                // Assign source to SLOTS
+                if (self.config.truncateSource && data.slot.source !== 'none') {
+                    truncatedSource = data.slot.source.substr(data.slot.source.indexOf('('));
+                    self.SLOTS[data.slot.id].source = truncatedSource
+                    self.setVariable('sourceSlot_' + data.slot.id, truncatedSource)
+                } else {
+                    self.SLOTS[data.slot.id].source = data.slot.source
+                    self.setVariable('sourceSlot_' + data.slot.id, data.slot.source)
+                }
+            } catch (err) {
+                self.log('error', '[Livemind Recorder] Error Slot undefined. Does the "Number of Slots to Create" in module settings match the slots in the "Grid Size" in Recorder?')
+                self.status(self.STATUS_ERROR, 'ERROR: Does the number of slots to create match the grid size in Recorder settings?');
+                self.setVariable('status', 'Error');
+            }
         }
 
         if (data.recording) {
@@ -372,6 +392,7 @@ instance.prototype.incomingData = function (data) {
             
             // Force a refresh all to get status of other slots
             self.updateStatus();
+            self.checkFeedbacks();
         }
 
     } else {
@@ -379,11 +400,9 @@ instance.prototype.incomingData = function (data) {
     }
 }
 
-
 // ########################
 // #### Define Actions ####
 // ########################
-
 
 // Define actions
 instance.prototype.initActions = function () {
@@ -577,12 +596,13 @@ instance.prototype.initFeedbacks = function() {
                 choices     : self.CHOICES_SLOT
         }],
         callback: function (feedback) {
-            if (self.SLOTS[feedback.options.slot].recording == 1) {
+            if (self.SLOTS[feedback.options.slot].recording === 1) {
                 return true
             }
             return false
         }
-    },
+    }
+
     feedbacks['slotIsStopped'] = {
         type       : 'boolean',
         label      : 'Slot is Stopped',
@@ -600,12 +620,39 @@ instance.prototype.initFeedbacks = function() {
             choices: self.CHOICES_SLOT
         }],
         callback: function (feedback) {
-            if (self.SLOTS[feedback.options.slot].recording == 0) {
+            if (self.SLOTS[feedback.options.slot].recording === 0) {
                 return true
             } 
             return false
         }
-    },
+    }
+
+    feedbacks['slotNotReady'] = {
+        type       : 'boolean',
+        label      : 'Slot is Not Ready',
+        description: 'If slot has no source and cannot record, set the button to this style',
+        style      : {
+            color  : self.rgb(110, 110, 110),
+            bgcolor: self.rgb(60, 60, 60),
+            png64  : self.ICON_RECORD_NOTAVAIL
+        },
+        options: [{
+            type   : 'dropdown',
+            label  : 'Select Slot [1-16]',
+            id     : 'slot',
+            tooltip: 'Select the slot this feedback monitors',
+            choices: self.CHOICES_SLOT_NOALL
+        }],
+        callback: function (feedback) {
+            if (self.SLOTS[feedback.options.slot].source === 'none' || 
+                self.SLOTS[feedback.options.slot].source === '' ||
+                self.SLOTS[feedback.options.slot].source === undefined)  {
+                return true
+            } 
+            return false
+        }
+    }
+
     feedbacks['slotIsListening'] = {
         type       : 'boolean',
         label      : 'Slot Listening',
@@ -622,12 +669,13 @@ instance.prototype.initFeedbacks = function() {
                 choices: self.CHOICES_SLOT_NOALL
         }],
         callback: function (feedback) {
-            if (self.SLOTS[feedback.options.slot].listening == 1) {
+            if (self.SLOTS[feedback.options.slot].listening === 1) {
                 return true
             }
             return false
         }
-    },
+    }
+
     feedbacks['slotIsStopListening'] = {
         type       : 'boolean',
         label      : 'Slot Stop Listening',
@@ -644,7 +692,7 @@ instance.prototype.initFeedbacks = function() {
                 choices     : self.CHOICES_SLOT_NOALL
         }],
         callback: function (feedback) {
-            if (self.SLOTS[feedback.options.slot].listening == 0) {
+            if (self.SLOTS[feedback.options.slot].listening === 0) {
                 return true
             }
             return false
@@ -671,7 +719,7 @@ instance.prototype.initPresets = function () {
             text   : 'Record All Slots',
             size   : 'auto',
             color  : '16777215',
-            bgcolor: self.rgb(0, 0, 0)
+            bgcolor: self.rgb(51,51,0)
         },
         actions: [{
             action : 'startRecordingSlot',
@@ -694,7 +742,7 @@ instance.prototype.initPresets = function () {
                 slot: 0
             },
             style : {
-                bgcolor: self.rgb(0,0,0)
+                bgcolor: self.rgb(51,51,0)
             }
         }]
     });
@@ -708,7 +756,7 @@ instance.prototype.initPresets = function () {
         text        : 'Stop Recording All Slots',
         size        : 'auto',
         color       : '16777215',
-        bgcolor     : self.rgb(0,0,0)
+        bgcolor     : self.rgb(51,51,0)
       },
       actions: [{
         action : 'stopRecordingSlot',
@@ -722,10 +770,28 @@ instance.prototype.initPresets = function () {
             slot: 0
         },
         style : {
-            bgcolor: self.rgb(0,0,0)
+            bgcolor: self.rgb(51,51,0)
         }
       }]
     });
+
+    // Create a refresh all slots button
+    presets.push({
+        category: 'Commands',
+        label   : 'refreshAllSlots',
+        bank    : {
+          style       : 'text',
+          text        : 'Refresh all slot status',
+          size        : 'auto',
+          color       : self.rgb(255,255,255),
+          bgcolor     : self.rgb(0,48,63),
+        },
+        actions: [{
+          action : 'refreshStatus',
+          options: {
+          }
+        }]
+      });
 
     // Create a start recording button for each slot
     const numberOfSLOTS = self.SLOTS.length;
@@ -741,7 +807,7 @@ instance.prototype.initPresets = function () {
               pngalignment: 'center:top',
               alignment   : 'center:bottom',
               color       : self.rgb(255,255,255),
-              bgcolor     : self.rgb(0,0,0)
+              bgcolor     : self.rgb(40,0,0)
             },
             actions: [{
               action : 'startRecordingSlot',
@@ -774,7 +840,7 @@ instance.prototype.initPresets = function () {
                 pngalignment: 'center:top',
                 alignment   : 'center:bottom',
                 color       : '16777215',
-                bgcolor     : self.rgb(0,0,0)
+                bgcolor     : self.rgb(40,0,0)
             },
             actions: [{
               action : 'stopRecordingSlot',
@@ -788,8 +854,57 @@ instance.prototype.initPresets = function () {
                   slot: index
               },
               style : {
-                  bgcolor: self.rgb(0,0,0)
+                  bgcolor: self.rgb(40,0,0)
               }
+            }]
+        });
+    }
+
+     // Create record/stop toggle buttons for each slot
+     for (let index = 1; index < numberOfSLOTS; index++) {
+        presets.push({
+            category: 'Record Toggle',
+            label   : `toggleRecSlot${index}`,
+            bank    : {
+              style    : 'text',
+              text     : `REC ${index}\\n$(recorder:sourceSlot_${index})`,
+              size     : '7',
+              color    : self.rgb(255,255,255),
+              bgcolor  : self.rgb(40,0,0),
+              png64    : self.ICON_RECORD_ACTIVE,
+              alignment: 'center:bottom',
+              latch    : true
+            },
+            actions: [{
+              action : 'startRecordingSlot',
+              options: {
+                slot: [ index ] 
+              }
+            }],
+            release_actions : [{
+                action : 'stopRecordingSlot',
+                options: {
+                    slot : [ index ]
+                }
+            }],
+            feedbacks: [{
+                type   : 'slotIsRecording',
+                options: {
+                    slot: index
+                },
+                style : {
+                    bgcolor: self.rgb(200,0,0)
+                }
+            },{
+                type   : 'slotNotReady',
+                options: {
+                    slot: index
+                },
+                style  : {
+                    color  : self.rgb(110, 110, 110),
+                    bgcolor: self.rgb(60, 60, 60),
+                    png64  : self.ICON_RECORD_NOTAVAIL
+                }
             }]
         });
     }
