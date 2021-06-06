@@ -17,7 +17,7 @@ Livemind Record offers an API through a simple TCP interface to control its oper
 
   - **Number of Slots to Create**: Select the number of slots to create based off of the grid layout you are using in Recorder. This should match the **Grid Size** setting in Recorder settings. Options: `(2x2, 3x2, 3x3, 4x3, 4x4, 2+8, 2+14)` 
   
-  - **Remove machine name from NDI source name**: NDI prepends source names with the machine name where the source. This can often cause source names to be very long. Select this option to remove the machine name from the source name. [`COMPUTER (Test)` becomes `(Test)` ]
+  - **Remove machine name from NDI source name**: NDI prepends source names with the machine name where the source. This can often cause source names to be very long. Select this option to remove the machine name from the source name. [ `COMPUTER (Test)` becomes `(Test)` ]
 
   - **Verbose Debug to Log**: Check this box to include verbose debug messages in the Companion log tab. Verbose will show the command and response from the API.
   

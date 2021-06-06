@@ -309,7 +309,7 @@ instance.prototype.updateConfig = function (config) {
 }
 
 // Subscribe to events
-instance.prototype.subscribeEvents = function() {
+instance.prototype.subscribeEvents = function () {
     var self = this;
     var cmd = '<recording_subscribe uid="' + Date.now() + '" />\r\n'
     self.sendCommand(cmd)
@@ -565,7 +565,7 @@ instance.prototype.sendCommand = function (cmd) {
 }
 
 // Query the status of all active slots
-instance.prototype.updateStatus = function updateStatus() {
+instance.prototype.updateStatus = function () {
     var self = this;
     var cmd = '<status slot="0" uid="' + Date.now() + '" />\r\n'
     self.sendCommand(cmd);
