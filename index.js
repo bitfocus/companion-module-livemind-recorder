@@ -1,5 +1,5 @@
 // Index.js
-// companion-module-livemind-recorder
+// companion-module-livemind-recorder v1.0.0
 // GitHub: https://github.com/bitfocus/companion-module-livemind-recorder
 
 var tcp           = require('../../tcp');
@@ -12,8 +12,7 @@ var xmlOptions = {
     parseAttributeValue   : true,
     trimValues            : true
 };
-var debug;
-var log;
+
 
 
 // ########################
@@ -22,7 +21,8 @@ var log;
 
 function instance(system, id, config) {
     var self = this;
-
+    var debug;
+    var log;
     // super-constructor
     instance_skel.apply(this, arguments);
 
@@ -719,7 +719,7 @@ instance.prototype.initPresets = function () {
             text   : 'Record All Slots',
             size   : 'auto',
             color  : '16777215',
-            bgcolor: self.rgb(51,51,0)
+            bgcolor: self.rgb(0,102,102)
         },
         actions: [{
             action : 'startRecordingSlot',
@@ -742,7 +742,7 @@ instance.prototype.initPresets = function () {
                 slot: 0
             },
             style : {
-                bgcolor: self.rgb(51,51,0)
+                bgcolor: self.rgb(0,102,102)
             }
         }]
     });
@@ -756,7 +756,7 @@ instance.prototype.initPresets = function () {
         text        : 'Stop Recording All Slots',
         size        : 'auto',
         color       : '16777215',
-        bgcolor     : self.rgb(51,51,0)
+        bgcolor     : self.rgb(0,102,102)
       },
       actions: [{
         action : 'stopRecordingSlot',
@@ -770,7 +770,7 @@ instance.prototype.initPresets = function () {
             slot: 0
         },
         style : {
-            bgcolor: self.rgb(51,51,0)
+            bgcolor: self.rgb(0,102,102)
         }
       }]
     });
@@ -868,7 +868,7 @@ instance.prototype.initPresets = function () {
             bank    : {
               style    : 'text',
               text     : `REC ${index}\\n$(recorder:sourceSlot_${index})`,
-              size     : '7',
+              size     : '14',
               color    : self.rgb(255,255,255),
               bgcolor  : self.rgb(40,0,0),
               png64    : self.ICON_RECORD_ACTIVE,
