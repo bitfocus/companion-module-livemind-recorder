@@ -2,18 +2,16 @@
 // companion-module-livemind-recorder v1.0.0
 // GitHub: https://github.com/bitfocus/companion-module-livemind-recorder
 
-var tcp           = require('../../tcp');
-var instance_skel = require('../../instance_skel');
-var xmlParser     = require('fast-xml-parser');
-var xmlOptions = {
+const tcp           = require('../../tcp');
+const instance_skel = require('../../instance_skel');
+const xmlParser     = require('fast-xml-parser');
+const xmlOptions = {
     attributeNamePrefix   : "",
     ignoreAttributes      : false,
     parseNodeValue        : true,
     parseAttributeValue   : true,
     trimValues            : true
 };
-
-
 
 // ########################
 // #### Instance setup ####
@@ -355,9 +353,11 @@ instance.prototype.incomingData = function (data) {
 
         if (data.slot) {
             // if (self.config.verbose) { self.log('debug', '[Livemind Recorder] Slot status received') }
-            var truncatedSource = ''
+            let truncatedSource = ''
 
             try {
+                //if (self.SLOTS[data.slot.id].recording !== data.slot.recording ||
+               //     self.SLOTS[data.slot.id].source !== data.slot.source) {
                 // Assign Recording status to SLOTS
                 self.SLOTS[data.slot.id].recording = data.slot.recording
                 self.setVariable('recordingSlot_' + data.slot.id, data.slot.recording)
@@ -371,6 +371,7 @@ instance.prototype.incomingData = function (data) {
                     self.SLOTS[data.slot.id].source = data.slot.source
                     self.setVariable('sourceSlot_' + data.slot.id, data.slot.source)
                 }
+            //}
             } catch (err) {
                 self.log('error', '[Livemind Recorder] Error Slot undefined. Does the "Number of Slots to Create" in module settings match the slots in the "Grid Size" in Recorder?')
                 self.status(self.STATUS_ERROR, 'ERROR: Does the number of slots to create match the grid size in Recorder settings?');
@@ -794,8 +795,7 @@ instance.prototype.initPresets = function () {
       });
 
     // Create a start recording button for each slot
-    const numberOfSLOTS = self.SLOTS.length;
-    for (let index = 1; index < numberOfSLOTS; index++) {
+    for (let index in self.SLOTS) {
         presets.push({
             category: 'Record',
             label   : `startRecSlot${index}`,
@@ -828,7 +828,7 @@ instance.prototype.initPresets = function () {
     }
 
     // Create a stop recording button for each slot
-    for (let index = 1; index < numberOfSLOTS; index++) {
+    for (let index in self.SLOTS) {
         presets.push({
             category: 'Stop Recording',
             label   : `stopRecSlot${index}`,
@@ -861,7 +861,7 @@ instance.prototype.initPresets = function () {
     }
 
      // Create record/stop toggle buttons for each slot
-     for (let index = 1; index < numberOfSLOTS; index++) {
+     for (let index in self.SLOTS) {
         presets.push({
             category: 'Record Toggle',
             label   : `toggleRecSlot${index}`,
@@ -910,7 +910,7 @@ instance.prototype.initPresets = function () {
     }
 
     // Create Listening toggle buttons for each slot
-    for (let index = 1; index < numberOfSLOTS; index++) {
+    for (let index in self.SLOTS) {
         presets.push({
             category: 'Listen',
             label   : `toggleListenSlot${index}`,
@@ -964,12 +964,13 @@ instance.prototype.initVariables = function() {
         { label: 'Slot 0 (All) Recording', name: 'recordingSlot_0' }
     ];
 
-    for (let index = 1; index < numberOfSLOTS; index++) {
-        variables.push({ label: `Slot ${index} Recording`, name: `recordingSlot_${index}` });
+    for (let index in self.SLOTS) {
+        
         if (index != 0) {
+            variables.push({ label: `Slot ${index} Recording`, name: `recordingSlot_${index}` });
             variables.push({ label: `Slot ${index} Source`, name: `sourceSlot_${index}` });
         }
-       
+    
     };
 
     self.setVariableDefinitions(variables);
