@@ -796,156 +796,168 @@ instance.prototype.initPresets = function () {
 
     // Create a start recording button for each slot
     for (let index in self.SLOTS) {
-        presets.push({
-            category: 'Record',
-            label   : `startRecSlot${index}`,
-            bank    : {
-              style       : 'png',
-              text        : `Rec ${index}`,
-              size        : '18',
-              png64       : self.ICON_RECORD_ACTIVE,
-              pngalignment: 'center:top',
-              alignment   : 'center:bottom',
-              color       : self.rgb(255,255,255),
-              bgcolor     : self.rgb(40,0,0)
-            },
-            actions: [{
-              action : 'startRecordingSlot',
-              options: {
-                slot: [ index ]
-              }
-            }],
-            feedbacks: [{
-              type   : 'slotIsRecording',
-              options: {
-                  slot: index
-              },
-              style : {
-                  bgcolor: self.rgb(200,0,0)
-              }
-            }]
-        });
+        // Skip slot 0
+        if (index !== '0') {
+            presets.push({
+                category: 'Record',
+                label   : `startRecSlot${index}`,
+                bank    : {
+                    style       : 'png',
+                    text        : `Rec ${index}`,
+                    size        : '18',
+                    png64       : self.ICON_RECORD_ACTIVE,
+                    pngalignment: 'center:top',
+                    alignment   : 'center:bottom',
+                    color       : self.rgb(255, 255, 255),
+                    bgcolor     : self.rgb(40, 0, 0)
+                },
+                actions: [{
+                    action : 'startRecordingSlot',
+                    options: {
+                        slot: [index]
+                    }
+                }],
+                feedbacks: [{
+                    type   : 'slotIsRecording',
+                    options: {
+                        slot: index
+                    },
+                    style: {
+                        bgcolor: self.rgb(200, 0, 0)
+                    }
+                }]
+            });
+        }
     }
 
     // Create a stop recording button for each slot
     for (let index in self.SLOTS) {
-        presets.push({
-            category: 'Stop Recording',
-            label   : `stopRecSlot${index}`,
-            bank    : {
-                style       : 'png',
-                text        : `Stop ${index}`,
-                size        : '18',
-                png64       : self.ICON_STOP,
-                pngalignment: 'center:top',
-                alignment   : 'center:bottom',
-                color       : '16777215',
-                bgcolor     : self.rgb(40,0,0)
-            },
-            actions: [{
-              action : 'stopRecordingSlot',
-              options: {
-                slot: [ index ]
-              }
-            }],
-            feedbacks: [{
-              type   : 'slotIsStopped',
-              options: {
-                  slot: index
-              },
-              style : {
-                  bgcolor: self.rgb(40,0,0)
-              }
-            }]
-        });
+        // Skip slot 0
+        if (index !=='0') {
+            presets.push({
+                category: 'Stop Recording',
+                label   : `stopRecSlot${index}`,
+                bank    : {
+                    style       : 'png',
+                    text        : `Stop ${index}`,
+                    size        : '18',
+                    png64       : self.ICON_STOP,
+                    pngalignment: 'center:top',
+                    alignment   : 'center:bottom',
+                    color       : '16777215',
+                    bgcolor     : self.rgb(40, 0, 0)
+                },
+                actions: [{
+                    action : 'stopRecordingSlot',
+                    options: {
+                        slot: [index]
+                    }
+                }],
+                feedbacks: [{
+                    type   : 'slotIsStopped',
+                    options: {
+                        slot: index
+                    },
+                    style: {
+                        bgcolor: self.rgb(40, 0, 0)
+                    }
+                }]
+            });
+        }
     }
 
-     // Create record/stop toggle buttons for each slot
-     for (let index in self.SLOTS) {
-        presets.push({
-            category: 'Record Toggle',
-            label   : `toggleRecSlot${index}`,
-            bank    : {
-              style    : 'text',
-              text     : `REC ${index}\\n$(recorder:sourceSlot_${index})`,
-              size     : '14',
-              color    : self.rgb(255,255,255),
-              bgcolor  : self.rgb(40,0,0),
-              png64    : self.ICON_RECORD_ACTIVE,
-              alignment: 'center:bottom',
-              latch    : true
-            },
-            actions: [{
-              action : 'startRecordingSlot',
-              options: {
-                slot: [ index ] 
-              }
-            }],
-            release_actions : [{
-                action : 'stopRecordingSlot',
-                options: {
-                    slot : [ index ]
-                }
-            }],
-            feedbacks: [{
-                type   : 'slotIsRecording',
-                options: {
-                    slot: index
+    // Create record/stop toggle buttons for each slot
+    for (let index in self.SLOTS) {
+        // Skip slot 0
+        if (index !=='0') {
+            presets.push({
+                category: 'Record Toggle',
+                label   : `toggleRecSlot${index}`,
+                bank    : {
+                    style    : 'text',
+                    text     : `REC ${index}\\n$(recorder:sourceSlot_${index})`,
+                    size     : '14',
+                    color    : self.rgb(255, 255, 255),
+                    bgcolor  : self.rgb(40, 0, 0),
+                    png64    : self.ICON_RECORD_ACTIVE,
+                    alignment: 'center:bottom',
+                    latch    : true
                 },
-                style : {
-                    bgcolor: self.rgb(200,0,0)
-                }
-            },{
-                type   : 'slotNotReady',
-                options: {
-                    slot: index
-                },
-                style  : {
-                    color  : self.rgb(110, 110, 110),
-                    bgcolor: self.rgb(60, 60, 60),
-                    png64  : self.ICON_RECORD_NOTAVAIL
-                }
-            }]
-        });
+                actions: [{
+                    action: 'startRecordingSlot',
+                    options: {
+                        slot: [index]
+                    }
+                }],
+                release_actions: [{
+                    action: 'stopRecordingSlot',
+                    options: {
+                        slot: [index]
+                    }
+                }],
+                feedbacks: [{
+                    type: 'slotIsRecording',
+                    options: {
+                        slot: index
+                    },
+                    style: {
+                        bgcolor: self.rgb(200, 0, 0)
+                    }
+                }, {
+                    type: 'slotNotReady',
+                    options: {
+                        slot: index
+                    },
+                    style: {
+                        color: self.rgb(110, 110, 110),
+                        bgcolor: self.rgb(60, 60, 60),
+                        png64: self.ICON_RECORD_NOTAVAIL
+                    }
+                }]
+            });
+        }
     }
 
     // Create Listening toggle buttons for each slot
     for (let index in self.SLOTS) {
-        presets.push({
-            category: 'Listen',
-            label   : `toggleListenSlot${index}`,
-            bank    : {
-              style  : 'text',
-              text   : `Listen\\nSlot ${index}`,
-              size   : '18',
-              color  : self.rgb(255,255,255),
-              bgcolor: self.rgb(0,0,100),
-              latch  : true
-            },
-            actions: [{
-              action : 'startListenSlot',
-              options: {
-                slot: index 
-              }
-            }],
-            release_actions : [{
-                action : 'stopListenSlot',
-                options: {
-                    slot : index
-                }
-            }],
-            feedbacks: [{
-              type   : 'slotIsListening',
-              options: {
-                  slot: index
-              },
-              style : {
-                  bgcolor: self.rgb(0,0,240)
-              }
-            }]
-        });
+        // Skip slot 0
+        if (index !=='0') {
+            presets.push({
+                category: 'Listen',
+                label   : `toggleListenSlot${index}`,
+                bank    : {
+                    style  : 'text',
+                    text   : `Listen\\nSlot ${index}`,
+                    size   : '18',
+                    color  : self.rgb(255, 255, 255),
+                    bgcolor: self.rgb(0, 0, 100),
+                    latch  : true
+                },
+                actions: [{
+                    action : 'startListenSlot',
+                    options: {
+                        slot: index
+                    }
+                }],
+                release_actions: [{
+                    action : 'stopListenSlot',
+                    options: {
+                        slot: index
+                    }
+                }],
+                feedbacks: [{
+                    type   : 'slotIsListening',
+                    options: {
+                        slot: index
+                    },
+                    style: {
+                        bgcolor: self.rgb(0, 0, 240)
+                    }
+                }]
+            });
+        }
     }
- 
+
   self.setPresetDefinitions(presets);
   }
 
@@ -965,18 +977,16 @@ instance.prototype.initVariables = function() {
     ];
 
     for (let index in self.SLOTS) {
-        
-        if (index != 0) {
+        // Skip slot 0
+        if (index !=='0') {
             variables.push({ label: `Slot ${index} Recording`, name: `recordingSlot_${index}` });
             variables.push({ label: `Slot ${index} Source`, name: `sourceSlot_${index}` });
         }
-    
     };
 
     self.setVariableDefinitions(variables);
     
 }
-
 
 instance_skel.extendedBy(instance);
 exports = module.exports = instance;
