@@ -13,11 +13,12 @@ Livemind Record offers an API through a simple TCP interface to control its oper
 
   - **IP ADDRESS**: This is the IP address of the machine running Livemind Recorder. If you are running on the same computer as Companion you may use `127.0.0.1` otherwise enter a valid IPv4 address in the same subnet. (Default: `127.0.0.1`)
 
-  - **PORT**: This is the TCP API port where Recorder is listenting for commands. This needs to match the port set in the Recorder settings dialog. (Default: `9099`)
+  - **PORT**: This is the TCP port where Recorder is listenting for API commands. This needs to match the port set in the Recorder settings dialog. (Default: `9099`)
 
   - **Number of Slots to Create**: Select the number of slots to create based off of the grid layout you are using in Recorder. This should match the **Grid Size** setting in Recorder settings. Options: `(2x2, 3x2, 3x3, 4x3, 4x4, 2+8, 2+14)` 
   
-  - **Remove machine name from NDI source name**: NDI prepends source names with the machine name where the source. This can often cause source names to be very long. Select this option to remove the machine name from the source name. [ `COMPUTER (Test)` becomes `(Test)` ]
+  - **Remove machine name from NDI source name**: NDI prepends source names with the machine name of where the source originates. This can often cause source names to be very long. Enable this option to remove the machine name from how NDI source names are displayed. 
+  [ `COMPUTER (Test)` becomes `(Test)` ]
 
   - **Verbose Debug to Log**: Check this box to include verbose debug messages in the Companion log tab. Verbose will show the command and response from the API.
   
