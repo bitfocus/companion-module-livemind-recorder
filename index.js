@@ -122,7 +122,7 @@ instance.prototype.config_fields = function () {
         {
             type   : 'dropdown',
             id     : 'slotsToCreate',
-            label  : 'Number of Slots to Create. This setting needs to match the "Grid Size" setting in Recorder settings.',
+            label  : 'Number of Slots to Create',
             width  : 5,
             default: 9,
             choices: [
@@ -134,11 +134,25 @@ instance.prototype.config_fields = function () {
             ] 
         },
         {
+            type   : 'text',
+            id     : 'slotsToCreateInfo',
+            width  : 7,
+            label  : '',
+            value  : 'This setting needs to match the "Grid Size" setting in Recorder settings.'
+        },
+        {
             type   : 'checkbox',
             id     : 'truncateSource',
-            width  : 6,
-            label  : 'Remove machine name from NDI source name. [ COMPUTER (Test) becomes (Test) ]',
+            width  : 1,
+            label  : 'Enable',
             default: false
+        },
+        {
+            type   : 'text',
+            id     : 'truncateSourceInfo',
+            width  : 11,
+            label  : 'Remove machine name from NDI source name.',
+            value  : '"COMPUTER (Test)" becomes "(Test)"   [Default: Un-Checked]'
         },
         // {
         //     type    : 'number',
@@ -154,9 +168,16 @@ instance.prototype.config_fields = function () {
         {
             type   : 'checkbox',
             id     : 'verbose',
-            width  : 9,
-            label  : 'Enable verbose debug messages to log window',
+            width  : 1,
+            label  : 'Enable',
             default: false
+        },
+        {
+            type   : 'text',
+            id     : 'verboseInfo',
+            width  : 11,
+            label  : 'Turn on verbose debug messages to log window.',
+            value  : 'When enabled the commands sent and received from Livemind Recorder will be logged.  [Default: Un-Checked]'
         }
     ]
 }
