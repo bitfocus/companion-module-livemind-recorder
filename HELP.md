@@ -57,7 +57,7 @@ The following variables are available to Companion. The number of variables avai
 
 Variable                | Description 
 ----------------------- | ----------------------------------- 
-**$(recorder:version)** | The current verison of the connected Recorder instance
+**$(recorder:version)** | The current version of the connected Recorder instance
 **$(recorder:apiVersion)** | The API version of the connected Recorder instance
 **$(recorder:status)**  | Connection status of Recorder. Possible values are: `Connected`, `Not Connected`, `Error`    
 **$(recorder:recordingSlot_`x`)** | Recording status of a given slot. `x` is a slot numnber `[1-16]` **Possible values are:** `0`- Not Recording, `1`- Recording, `undefined`- Slot not initialized
